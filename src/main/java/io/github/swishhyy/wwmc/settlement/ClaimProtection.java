@@ -62,7 +62,8 @@ public final class ClaimProtection {
         Settlement town=claim(level,pos);
         // Invitees may open only the flag's invitation screen; no claim access exists before acceptance.
         boolean invitation=town!=null && level.getBlockState(pos).is(WWMC.BANNER.get()) && TownAccess.invited(town,player.getUUID());
-        boolean blocked=denied(level,player,pos) && !invitation;
+        boolean board=town!=null && town.center.equals(pos) && level.getBlockState(pos).is(WWMC.BANNER.get()) && player.getItemInHand(event.getHand()).isEmpty();
+        boolean blocked=denied(level,player,pos) && !invitation && !board;
         var item=player.getItemInHand(event.getHand()).getItem();
         if(!blocked && event.getFace()!=null && (item instanceof BlockItem || item instanceof BucketItem))
             blocked=denied(level,player,pos.relative(event.getFace()));
@@ -100,15 +101,18 @@ public final class ClaimProtection {
     }
     @SubscribeEvent(priority=EventPriority.LOWEST)
     public void attack(AttackEntityEvent event) {
-        if(event.getEntity().level() instanceof ServerLevel level && denied(level,event.getEntity(),event.getTarget().blockPosition())) event.setCanceled(true);
+        if(event.getEntity().level() instanceof ServerLevel level && denied(level,event.getEntity(),event.getTarget().blockPosition())
+                && !MultiplayerCombat.claimException(level,event.getEntity(),event.getTarget())) event.setCanceled(true);
     }
     @SubscribeEvent(priority=EventPriority.LOWEST)
     public void damage(LivingIncomingDamageEvent event) {
-        if(event.getEntity().level() instanceof ServerLevel level && event.getSource().getEntity() instanceof Player player && denied(level,player,event.getEntity().blockPosition())) event.setCanceled(true);
+        if(event.getEntity().level() instanceof ServerLevel level && event.getSource().getEntity() instanceof Player player && denied(level,player,event.getEntity().blockPosition())
+                && !MultiplayerCombat.claimException(level,player,event.getEntity())) event.setCanceled(true);
     }
     @SubscribeEvent(priority=EventPriority.LOWEST)
     public void invulnerability(EntityInvulnerabilityCheckEvent event) {
-        if(event.getEntity().level() instanceof ServerLevel level && event.getSource().getEntity() instanceof Player player && denied(level,player,event.getEntity().blockPosition())) event.setInvulnerable(true);
+        if(event.getEntity().level() instanceof ServerLevel level && event.getSource().getEntity() instanceof Player player && denied(level,player,event.getEntity().blockPosition())
+                && !MultiplayerCombat.claimException(level,player,event.getEntity())) event.setInvulnerable(true);
     }
     @SubscribeEvent(priority=EventPriority.LOWEST)
     public void explosion(ExplosionEvent.Detonate event) {

@@ -70,7 +70,7 @@ public final class CampaignChecks {
         SupplyRequests.snapshot(npc,List.of(pantry)); assertEquals(32,SupplyRequests.deficit(npc,"minecraft:bread"));
         order.delivered=16; pantry.getItem(0).grow(16); SupplyRequests.snapshot(npc,List.of(pantry)); assertEquals(16,SupplyRequests.deficit(npc,"minecraft:bread"));
         pantry.getItem(0).shrink(8); SupplyRequests.snapshot(npc,List.of(pantry)); assertEquals(16,SupplyRequests.deficit(npc,"minecraft:bread"));
-        order.delivered=32; SupplyRequests.snapshot(npc,List.of(pantry)); assertFalse(npc.campaign.requests.containsKey("minecraft:bread"));
+        order.delivered=32; SupplyRequests.snapshot(npc,List.of(pantry)); assertEquals(16,npc.campaign.requests.get("minecraft:bread")); assertEquals(0,SupplyRequests.deficit(npc,"minecraft:bread"));
     }
     @Test void projectsSpendMaterialsAtomicallyAndOnlyOnce(MinecraftServer server) {
         var stock=new SimpleContainer(3); stock.setItem(0,new ItemStack(Items.IRON_INGOT,24)); stock.setItem(1,new ItemStack(Items.BIRCH_PLANKS,31));

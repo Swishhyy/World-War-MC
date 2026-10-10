@@ -47,7 +47,8 @@ public final class NpcSettlements {
                 && town.citizens.size()<Math.min(10,SettlementService.populationLimit(town))) {
             var stock=SettlementService.storage(level,town);
             if(InventoryOps.count(stock,FoodHealing::food)>=40 && SettlementService.recruit(level,town,1)>0)
-                for(int n=0;n<8;n++) InventoryOps.takeOne(stock,FoodHealing::food);
+                { for(int n=0;n<8;n++) InventoryOps.takeOne(stock,FoodHealing::food);
+                  CampaignService.journal(level,town,"A new citizen joined after our workers gathered enough food."); }
         }
     }
     public static boolean loaded(ServerLevel level,BlockPos center) {
@@ -118,6 +119,8 @@ public final class NpcSettlements {
         town.trading.buildIndex=-1;
         SettlementService.recruit(level,town,Math.min(6,SettlementService.populationLimit(town)));
         town.trading.status="Neutral town: ready to accept a supply route";
+        NeighbourTrade.refreshRequests(town);
+        CampaignService.journal(level,town,"Our settlement is ready for neighbours and trade.");
         PLANS.get(level).remove(town.id); SettlementData.get(level).setDirty();
     }
     private static Station station(Settlement t,int x,int z,StructureRole role) { return new Station(t.center.offset(x,0,z),role,Direction.NORTH); }

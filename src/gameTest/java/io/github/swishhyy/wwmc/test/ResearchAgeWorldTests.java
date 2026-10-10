@@ -23,6 +23,7 @@ import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
@@ -60,6 +61,12 @@ public final class ResearchAgeWorldTests {
             var level=helper.getLevel(); BlockPos start=helper.absolutePos(new BlockPos(0,2,-12600));
             var chunks=CitizenNavigationTests.pinTicking(level,start,1); CitizenNavigationTests.meadow(level,start,-8,16,-8,8);
             var owner=new RecipePlayer(level,new GameProfile(UUID.randomUUID(),"BronzeOwner"));
+            WWMC.TAB.get().buildContents(new CreativeModeTab.ItemDisplayParameters(level.enabledFeatures(),false,level.registryAccess()));
+            for(var material:List.of(WWMC.RAW_TIN.get(),WWMC.TIN_INGOT.get(),WWMC.BRONZE_BLEND.get(),WWMC.BRONZE_INGOT.get()))
+                helper.assertTrue(WWMC.TAB.get().getDisplayItems().stream().filter(s -> s.is(material)).count()==1,
+                        "A bronze ingredient is missing or duplicated in the real creative tab: "+material);
+            helper.assertTrue(new ItemStack(WWMC.BRONZE_BLEND.get()).get(net.minecraft.core.component.DataComponents.LORE).lines().size()==3,
+                    "Bronze Blend does not explain its ingredients, smelting step and research requirement");
             owner.setPos(start.getX()+.5,start.getY(),start.getZ()+.5);
             var town=new Settlement(UUID.randomUUID(),owner.getUUID(),"Bronze production",start,32,List.of(),List.of(),"balanced");
             SettlementData.get(level).settlements.add(town);

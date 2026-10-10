@@ -57,7 +57,9 @@ public final class Settlement {
             return s;
         },
         s -> Pair.of(s,new Extra(Optional.of(s.jobs),s.citizenPlaces,Optional.of(s.campaign),Optional.of(s.progress)))).codec();
-    public final UUID id, owner;
+    public final UUID id;
+    /** Changes only when both main settlement owners consent to an expedition outpost battle and its flag is captured. */
+    public UUID owner;
     public String name, priority;
     public final BlockPos center;
     public int radius;

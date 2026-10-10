@@ -70,7 +70,8 @@ public final class CitizenRenderer extends HumanoidMobRenderer<CitizenEntity,Cit
         state.armoredFeet=!citizen.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET).isEmpty();
         HumanoidModel.ArmPose main=citizen.isUsingItem() && citizen.getUseItem().getItem() instanceof BowItem ? HumanoidModel.ArmPose.BOW_AND_ARROW
                 : citizen.getMainHandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
-        HumanoidModel.ArmPose off=citizen.getOffhandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
+        HumanoidModel.ArmPose off=citizen.isBlocking() ? HumanoidModel.ArmPose.BLOCK
+                : citizen.getOffhandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
         boolean right=citizen.getMainArm()==HumanoidArm.RIGHT;
         state.rightHanded=right;
         state.rightArmPose=right ? main : off;

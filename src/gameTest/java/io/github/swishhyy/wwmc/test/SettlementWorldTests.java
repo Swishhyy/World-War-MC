@@ -93,7 +93,8 @@ public final class SettlementWorldTests {
             Settlement a=town(level,owner.getUUID(),start,"Home"),b=town(level,otherOwner.getUUID(),second,"Neighbor");
             BlockPos stock=start.west(3),stone=start.north(3); level.setBlockAndUpdate(stock,Blocks.BARREL.defaultBlockState()); level.setBlockAndUpdate(stone,Blocks.STONE.defaultBlockState());
             helper.assertTrue(!friend.gameMode.destroyBlock(stone) && level.getBlockState(stone).is(Blocks.STONE),"Uninvited player broke claimed blocks");
-            helper.assertTrue(use(friend,stock).isCanceled() && use(friend,start).isCanceled(),"Uninvited player can open claim storage or controls");
+            helper.assertTrue(use(friend,stock).isCanceled() && !use(friend,start).isCanceled()
+                    && MultiplayerViews.valid(friend,start) && !RelationshipViews.valid(friend,start),"Public contract board granted storage or relationship controls, or its flag was blocked");
             TownAccess.alliance(a,b,owner.getUUID()); TownAccess.alliance(b,a,otherOwner.getUUID());
             helper.assertTrue(TownAccess.allied(a,b) && ClaimProtection.denied(level,otherOwner,start),"An alliance granted access to another town's claim");
             TownAccess.invite(a,owner.getUUID(),friend.getUUID(),"builder");

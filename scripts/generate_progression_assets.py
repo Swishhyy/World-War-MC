@@ -1,4 +1,4 @@
-"""Generate progression assets; recolor vanilla iron textures for bronze and tin.
+"""Generate progression assets; recolor vanilla textures for bronze and tin.
 
 Requires Python, Pillow and the official Minecraft 26.2 client JAR. Colors change;
 pixel positions, tool handles, rock backgrounds, transparency and armor UVs stay intact.
@@ -20,12 +20,16 @@ PALETTES = {
                (150, (167, 106, 48)), (190, (201, 140, 65)), (216, (223, 167, 84)), (255, (255, 220, 146))],
     'tin': [(24, (24, 24, 24)), (68, (55, 70, 78)), (107, (90, 112, 120)),
             (150, (140, 164, 173)), (190, (181, 204, 213)), (216, (208, 225, 232)), (255, (240, 249, 255))],
+    # Copper powder colors sampled from the approved gunpowder recolor preview.
+    'blend': [(0, (0, 0, 0)), (45, (80, 35, 15)), (62, (99, 47, 23)),
+              (73, (119, 57, 32)), (80, (130, 61, 34)), (84, (148, 70, 38)),
+              (114, (207, 105, 58)), (138, (253, 138, 83)), (255, (255, 220, 146))],
 }
 # destination, vanilla source, palette, optional pixels to preserve
 TEXTURE_SOURCES = [
     ('item/raw_tin', 'item/raw_iron', 'tin', None),
     ('item/tin_ingot', 'item/iron_ingot', 'tin', None),
-    ('item/bronze_blend', 'item/raw_iron', 'bronze', None),
+    ('item/bronze_blend', 'item/gunpowder', 'blend', None),
     ('item/bronze_ingot', 'item/iron_ingot', 'bronze', None),
 ] + [
     ('item/bronze_' + part, 'item/iron_' + part, 'bronze', 'wood' if part in ('sword', 'pickaxe', 'axe', 'shovel', 'hoe') else None)
@@ -134,6 +138,14 @@ def generate_textures(client_jar):
                     pixel = tinted((red, green, blue), PALETTES[material]) + (alpha,)
                     image.putpixel((x, y), pixel)
                     changed += pixel != original.getpixel((x, y))
+            if destination == 'item/bronze_blend':
+                # Four tin flecks recolor existing powder pixels without changing its silhouette.
+                for x, y, color in [(8, 5, (166, 189, 214)), (4, 8, (165, 192, 217)),
+                                    (11, 8, (150, 177, 202)), (5, 10, (173, 203, 223))]:
+                    alpha = original.getpixel((x, y))[3]
+                    if not alpha:
+                        raise ValueError('Tin fleck must stay within the vanilla gunpowder sprite')
+                    image.putpixel((x, y), color + (alpha,))
             if not changed or image.getchannel('A').tobytes() != original.getchannel('A').tobytes():
                 raise ValueError('Invalid vanilla recolor: ' + destination)
             folder, name = destination.rsplit('/', 1)

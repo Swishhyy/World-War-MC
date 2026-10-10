@@ -58,15 +58,15 @@ public final class CampaignService {
         if(!level.hasChunkAt(town.center) || !level.isPositionEntityTicking(town.center)) return;
         SupplyRequests.snapshotLoaded(level,town);
         data.setDirty();
-        if(!town.trading.npc) return;
+        if(!town.trading.npc || town.trading.buildIndex>=0) return;
+        NeighbourTrade.update(level,town);
         CampaignContracts.expire(level,town);
         if(town.campaign.nextEvent==0) { town.campaign.nextEvent=level.getGameTime()+6000; return; }
         if(level.getGameTime()<town.campaign.nextEvent) return;
         town.campaign.nextEvent=level.getGameTime()+12000+level.getRandom().nextInt(12000);
         SupplyContract offer=CampaignContracts.offer(level,town);
         for(Settlement playerTown:data.settlements) if(!playerTown.trading.npc && playerTown.center.distSqr(town.center)<4096.0*4096.0) {
-            if(offer!=null) record(level,playerTown,town.name+" requests "+offer.amount+" "+offer.item.replace("minecraft:","")+". Check Contracts at the campaign board.");
-            else if(town.trading.partner==null) record(level,playerTown,town.name+" has a free trading checkpoint and is looking for a partner.");
+            if(offer!=null) journal(level,playerTown,town.name+" requests "+offer.amount+" "+offer.item.replace("minecraft:","")+". Check Neighbours at the banner.");
         }
     }
     @SubscribeEvent public void died(LivingDeathEvent event) {

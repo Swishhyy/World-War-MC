@@ -15,6 +15,7 @@ Start with [installing Villager Colonies](../README.md#install) and [building yo
 | Trap recipes, maintenance and defending against waves | [Defenses and traps](defenses.md) |
 | Furnaces, kitchens, yield upgrades, pickaxes, and hospitals | [Production and recovery](production-recovery.md) |
 | Permissions, alliances, trade, squads, expeditions, research, and outposts | [Multiplayer and campaign](multiplayer-campaign.md) |
+| Player contracts, duels and agreed outpost battles | [Player interactions](multiplayer-campaign.md#player-supply-contracts) |
 | Missing Overworld settings on a dedicated server | [Server startup help](server-startup.md) |
 | Worker stalls, recovery warnings, errors and console settings | [Server diagnostics](diagnostics.md) |
 | Release history | [Changelog](CHANGELOG.md) |

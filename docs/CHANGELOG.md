@@ -4,10 +4,23 @@
 
 ## Unreleased
 
+- Add a Neighbours banner board with nearby-town needs, trade status, NPC requests, alliances and quiet news. Keep other player towns' journals private.
+- Let existing traders fulfil accepted player-settlement contracts with physical warehouse deliveries, home stock reserves, incoming demand reservations and saved emerald payments. Manual delivery remains available.
+- Let loaded NPC settlements arrange up to two neighbour trade routes and exchange real surplus. Leave their primary checkpoint available for player trade; record deliveries and food-funded growth at the banner.
+- Give player-connected routes priority over autonomous NPC caravans within the existing server trader limit.
+- Remove the duel feature. Refund previously reserved preview stakes when loading existing saves.
+- Add owner-approved battles for expedition resource outposts: hold the flag to capture its existing miners, storage and supply route. Both owners must stay online.
+- Fix guards swapping away their bows while drawing; use real arrows and fall back to melee when ammunition runs out. Let guards collect shields from stands or storage and block between attacks, with a visible raised-shield pose.
+- Use native melee range so guards keep approaching instead of stopping at their longer block-work reach and swinging too far away.
+- Apply normal shield durability wear to a guard's actual blocked damage; frontal blocks protect health while rear hits still land.
+- Log caravan handoffs, contract payments, outpost ownership changes and interrupted-battle recovery without recurring chat announcements.
 - Make tin and bronze recipes discoverable in the vanilla recipe book, and show the bronze crafting grid and smelting step in the Settlement Guide. Keep Bronze Age research requirements.
+- Explain raw tin, tin ingots and Bronze Blend in item tooltips; verify that every alloy ingredient appears in the mod's creative tab.
+- Recolor the vanilla gunpowder sprite for Bronze Blend: copper powder with four pale blue tin flecks, preserving its exact shape and transparency.
 - Replace cod and salmon carcass shapes with whole fish: intact heads, visible eyes, fins and forked tails, with a sideways dropped-item pose.
 - Fix lumberjack planting through grass and flowers and beneath natural forest canopies. Let nearby natural leaves from other tree species be cleared when they obstruct a trunk.
 - Use reachable job-barrel or carried saplings when selecting new planting work, and show clearer forestry pause reasons in citizen screens, settlement needs and rate-limited server logs.
+- Stop overlapping warehouse, housing and hospital scan ranges from marking natural trees as buildings. Allow forestry beside town banners; retain protection for placed logs and real construction, with the blocking block's coordinates in the pause reason.
 - Recolor vanilla Minecraft textures for bronze tools, armor, ingots and blocks, and tin ores and materials. Preserve vanilla shapes, wooden handles, rock backgrounds and worn armor layouts.
 
 ## 0.1.0.0

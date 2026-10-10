@@ -87,6 +87,7 @@ public final class RelationshipViews {
         return new PanelView(Component.literal(town.name+" · Relationships"),Component.literal(owner ? "Set access, approve alliances and name your town" : "Your permissions and invitations; the owner controls relationships"),
                 List.of(new PanelView.Tab("Players",players),new PanelView.Tab("Settlements",towns),new PanelView.Tab("Invitations",invitations),new PanelView.Tab("Town",settings)),
                 List.of(new PanelView.Action(BACK,"Town overview",TownAccess.manages(town,viewer.getUUID()) && intact && viewer.distanceToSqr(Vec3.atCenterOf(town.center))<=64),
+                        new PanelView.Action(MultiplayerViews.OPEN,"Neighbours",MultiplayerViews.valid(viewer,town.center),"Nearby towns, settlement trade, supply contracts and quiet news"),
                         new PanelView.Action(RENAME,"Save name",owner,"Only the owner may rename the town"),
                         new PanelView.Action(RECOVER,intact ? "Flag intact" : "Restore flag",TownAccess.builds(town,viewer.getUUID()) && flagLoaded && !intact,"Consumes one Settlement Banner from your inventory; restores the saved location without replacing other blocks")));
     }
@@ -100,6 +101,7 @@ public final class RelationshipViews {
     public static void act(ServerPlayer player,BlockPos flag,int action,int value,String key) {
         if(!valid(player,flag)) return;
         ServerLevel level=level(player); Settlement town=SettlementData.get(level).at(flag); String message="";
+        if(action==MultiplayerViews.OPEN) { MultiplayerViews.open(player,town); return; }
         if(action==BACK) { if(TownAccess.manages(town,player.getUUID()) && Panels.valid(player,town.center,true)) Panels.openTown(player,town); return; }
         if(action==RENAME) message=rename(level,town,player.getUUID(),key);
         else if(action==RECOVER) message=SettlementService.recoverBanner(level,player,town);

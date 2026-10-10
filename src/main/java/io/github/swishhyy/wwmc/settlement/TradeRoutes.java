@@ -17,7 +17,9 @@ public final class TradeRoutes {
     }
     public static boolean agreed(Settlement a,Settlement b) {
         return a!=null && b!=null && a!=b && (b.id.equals(a.trading.partner) && a.id.equals(b.trading.partner)
-                || TownAccess.allied(a,b) && a.campaign.extraRoutes.contains(b.id) && b.campaign.extraRoutes.contains(a.id));
+                || (TownAccess.allied(a,b) || a.trading.npc && b.trading.npc
+                    && a.trading.relations.getOrDefault(b.owner,0)>=0 && b.trading.relations.getOrDefault(a.owner,0)>=0)
+                    && a.campaign.extraRoutes.contains(b.id) && b.campaign.extraRoutes.contains(a.id));
     }
     public static Settlement partner(ServerLevel level,Settlement town) {
         List<Settlement> partners=partners(level,town);

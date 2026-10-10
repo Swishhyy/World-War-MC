@@ -50,13 +50,18 @@ public final class ForestryService {
     public static boolean naturalLeaf(BlockState state) {
         return state.getBlock() instanceof LeavesBlock && !state.getValue(LeavesBlock.PERSISTENT);
     }
+    /** Station scan ranges are not buildings. Real fixtures and placed construction remain protected. */
+    public static boolean protectedFixture(Settlement town,BlockPos pos) {
+        return town.center.equals(pos) || town.borderBanners.contains(pos)
+                || town.stations.stream().anyMatch(s -> s.position().equals(pos));
+    }
     public interface TreeView {
         BlockState state(BlockPos pos);
         boolean available(BlockPos pos);
         boolean protectedAt(BlockPos pos);
         boolean furnitureAt(BlockPos pos);
         boolean blockEntityAt(BlockPos pos);
-        /** The owning Lumber Station and its job barrels may sit beside a natural tree. */
+        /** The owning Lumber Station, its barrels and town banners may sit beside a natural tree. */
         default boolean workFixtureAt(BlockPos pos) { return false; }
     }
     public static Tree tree(ServerLevel level,Settlement town,BlockPos root) {
@@ -79,11 +84,12 @@ public final class ForestryService {
         Station lumber=town.nearestStation(root,s -> s.role()==StructureRole.LUMBER && SettlementService.active(level,s));
         Set<BlockPos> fixtures=new HashSet<>();
         if(lumber!=null) { fixtures.add(lumber.position()); fixtures.addAll(SettlementService.jobBarrels(level,town,lumber)); }
+        fixtures.add(town.center); fixtures.addAll(town.borderBanners);
         return new TreeView() {
             public BlockState state(BlockPos pos) { return level.getBlockState(pos); }
             public boolean available(BlockPos pos) { return loaded(level,town,pos); }
             public boolean protectedAt(BlockPos pos) { return data.protectedBlocks.contains(pos); }
-            public boolean furnitureAt(BlockPos pos) { return SettlementService.protectedFurniture(town,pos); }
+            public boolean furnitureAt(BlockPos pos) { return protectedFixture(town,pos); }
             public boolean blockEntityAt(BlockPos pos) { return level.getBlockEntity(pos)!=null; }
             public boolean workFixtureAt(BlockPos pos) { return fixtures.contains(pos); }
         };
@@ -112,7 +118,8 @@ public final class ForestryService {
             if(!logs.add(pos)) continue;
             if(logs.size()>MAX_LOGS) return rejected("Connected trees exceed the safe harvesting limit");
             if(!world.available(pos)) return rejected("Trees extend outside the claim or into unloaded terrain");
-            if(world.protectedAt(pos) || world.furnitureAt(pos)) return rejected("Player-placed logs or nearby buildings protect these trees");
+            if(world.protectedAt(pos)) return rejected("Player-placed logs protect the trunk at "+pos.toShortString());
+            if(world.furnitureAt(pos)) return rejected("A station or banner protects the trunk at "+pos.toShortString());
             if(soil(world.state(pos.below()))) roots.add(pos);
             if(minimumLeaves>0 && canopy.size()<minimumLeaves && pos.getY()>=root.getY()+2) {
                 for(BlockPos leaf:BlockPos.betweenClosed(pos.offset(-2,-1,-2),pos.offset(2,3,2)))
@@ -124,8 +131,11 @@ public final class ForestryService {
                 // Truncating a tree at an unloaded chunk would leave floating trunks.
                 if(!world.available(adjacent)) return rejected("Trees extend outside the claim or into unloaded terrain");
                 BlockState state=world.state(adjacent);
+                if(state.is(BlockTags.LOGS) && world.protectedAt(adjacent))
+                    return rejected("Player-placed logs protect the trunk at "+adjacent.toShortString());
                 if(state.is(BlockTags.PLANKS) || !world.workFixtureAt(adjacent) && (world.blockEntityAt(adjacent)
-                        || world.protectedAt(adjacent) && !state.isAir() && !soil(state))) return rejected("Player-placed logs or nearby buildings protect these trees");
+                        || world.furnitureAt(adjacent) || world.protectedAt(adjacent) && !state.isAir() && !soil(state)))
+                    return rejected("Nearby construction at "+adjacent.toShortString()+" ("+state.getBlock().getName().getString()+") protects this tree");
                 if(!state.is(BlockTags.LOGS) || logs.contains(adjacent)) continue;
                 if(!state.is(species.log) || !world.available(adjacent)
                         || Math.abs(adjacent.getX()-root.getX())>CROWN_RADIUS
@@ -150,7 +160,7 @@ public final class ForestryService {
             BlockPos pos=site.root().offset(x,0,z);
             if(!loaded(level,town,pos) || !station.contains(pos) || !loaded(level,town,pos.below())
                     || !(level.getBlockState(pos).isAir() || CitizenReach.softCover(level,pos,level.getBlockState(pos))) || !level.getFluidState(pos).isEmpty()
-                    || data.protectedBlocks.contains(pos) || SettlementService.protectedFurniture(town,pos)
+                    || data.protectedBlocks.contains(pos) || protectedFixture(town,pos)
                     || level.getBlockEntity(pos)!=null
                     || !site.species().sapling.defaultBlockState().canSurvive(level,pos)) return false;
         }
@@ -159,7 +169,7 @@ public final class ForestryService {
             BlockState state=level.getBlockState(pos);
             if(state.isAir()) continue;
             if(!level.getFluidState(pos).isEmpty() || data.protectedBlocks.contains(pos)
-                    || SettlementService.protectedFurniture(town,pos) || level.getBlockEntity(pos)!=null
+                    || protectedFixture(town,pos) || level.getBlockEntity(pos)!=null
                     || !(naturalLeaf(state) || CitizenReach.softCover(level,pos,state))) return false;
         }
         return true;
@@ -267,7 +277,7 @@ public final class ForestryService {
             for(BlockPos leaf:BlockPos.betweenClosed(log.offset(-3,-1,-3),log.offset(3,3,3))) {
                 if(foliage.size()>=512) break;
                 if(loaded(level,town,leaf) && naturalLeaf(level.getBlockState(leaf),tree.species())
-                        && !WorldWorkData.get(level).protectedBlocks.contains(leaf) && !SettlementService.protectedFurniture(town,leaf)) foliage.add(leaf.immutable());
+                        && !WorldWorkData.get(level).protectedBlocks.contains(leaf) && !protectedFixture(town,leaf)) foliage.add(leaf.immutable());
             }
         }
         List<ItemStack> drops=new ArrayList<>();

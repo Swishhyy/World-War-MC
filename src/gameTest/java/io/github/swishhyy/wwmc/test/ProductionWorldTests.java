@@ -39,6 +39,42 @@ public final class ProductionWorldTests {
     @TestHolder(description="A player-placed Lumber Station beside a natural trunk does not misclassify the tree as a building.")
     static void fellsTreeBesideLumberStation(DynamicTest test) { lumberBesideFixture(test,-7800,true); }
 
+    @GameTest(timeoutTicks=1600)
+    @EmptyTemplate
+    @TestHolder(description="A natural forest tree beside a Lumber Station and banner can be cut and replanted inside an overlapping warehouse range; actual placed logs and building planks still protect it.")
+    static void forestWorkWithinOverlappingStationRange(DynamicTest test) {
+        test.onGameTest(helper -> {
+            var level=helper.getLevel(); BlockPos start=helper.absolutePos(new BlockPos(0,2,-13800));
+            Station lumber=new Station(start.east(24),StructureRole.LUMBER);
+            Station warehouse=new Station(lumber.position().south(3),StructureRole.WAREHOUSE);
+            BlockPos root=lumber.position().east(),banner=root.north();
+            var f=fixtureAt(level,start,banner,lumber,warehouse);
+            WorldWorkData.get(level).protect(banner); WorldWorkData.get(level).protect(lumber.position());
+            for(int y=0;y<4;y++) level.setBlockAndUpdate(root.above(y),Blocks.OAK_LOG.defaultBlockState());
+            for(int x=-2;x<=2;x++) for(int z=-2;z<=2;z++) if(x!=0 || z!=0)
+                level.setBlockAndUpdate(root.offset(x,3,z),Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT,false));
+            Container supplies=barrel(level,lumber.position().north(2),new ItemStack(Items.IRON_AXE),new ItemStack(Items.OAK_SAPLING,8));
+            helper.assertTrue(SettlementService.protectedFurniture(f.town(),root),"Fixture did not reproduce the old station-volume rejection");
+            helper.assertTrue(ForestryService.tree(level,f.town(),root)!=null,"An overlapping warehouse scan range or banner rejected a natural tree");
+            BlockPos wall=root.south().above(); level.setBlockAndUpdate(wall,Blocks.OAK_PLANKS.defaultBlockState());
+            var blocked=ForestryService.inspect(level,f.town(),root);
+            helper.assertTrue(blocked.tree()==null && blocked.reason().contains(wall.toShortString()),"Building protection did not identify the exact blocking construction");
+            level.setBlockAndUpdate(wall,Blocks.AIR.defaultBlockState());
+            WorldWorkData.get(level).protect(root.above());
+            helper.assertTrue(ForestryService.tree(level,f.town(),root)==null,"The station-range fix authorized chopping a placed log");
+            WorldWorkData.get(level).protectedBlocks.remove(root.above());
+            var citizen=f.worker(lumber,lumber.position().west(3)); citizen.bag().offer(new ItemStack(Items.BREAD,2));
+            helper.succeedWhen(() -> {
+                helper.assertTrue(level.getBlockState(root).is(Blocks.OAK_SAPLING),"The overlapping-range tree was not cut and replanted: "+describe(citizen));
+                for(int y=1;y<4;y++) helper.assertTrue(!level.getBlockState(root.above(y)).is(Blocks.OAK_LOG),"The upper trunk was left behind");
+                helper.assertTrue(citizen.bag().count(Items.OAK_LOG)+count(supplies,Items.OAK_LOG)==4,"Tree harvesting lost or duplicated logs");
+                helper.assertTrue(level.getBlockState(banner).getBlock()==WWMC.BANNER.get()
+                        && level.getBlockState(warehouse.position()).getBlock()==WWMC.STATIONS.get(StructureRole.WAREHOUSE).get(),"Forestry changed a protected fixture");
+                f.close();
+            });
+        });
+    }
+
     @GameTest(timeoutTicks=400)
     @EmptyTemplate
     @TestHolder(description="A lumberjack leaves player-placed wood untouched and keeps the tree-search reason visible throughout its retry pause.")
@@ -215,9 +251,12 @@ public final class ProductionWorldTests {
         }
     }
     private static Fixture fixture(ServerLevel level,BlockPos start,Station... stations) {
+        return fixtureAt(level,start,start.west(4),stations);
+    }
+    private static Fixture fixtureAt(ServerLevel level,BlockPos start,BlockPos center,Station... stations) {
         var chunks=CitizenNavigationTests.pinArea(level,start,-8,48,-14,14);
         CitizenNavigationTests.meadow(level,start,-8,48,-14,14);
-        var town=new Settlement(UUID.randomUUID(),UUID.randomUUID(),"Production regression",start.west(4),64,List.of(),List.of(stations),"balanced");
+        var town=new Settlement(UUID.randomUUID(),UUID.randomUUID(),"Production regression",center,64,List.of(),List.of(stations),"balanced");
         SettlementData.get(level).settlements.add(town); SettlementData.get(level).setDirty();
         level.setBlockAndUpdate(town.center,WWMC.BANNER.get().defaultBlockState());
         for(var s:stations) level.setBlockAndUpdate(s.position(),WWMC.STATIONS.get(s.role()).get().defaultBlockState()

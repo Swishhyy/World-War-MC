@@ -36,7 +36,10 @@ public final class TradeChunks {
     private static boolean needed(ServerLevel level,Settlement town) { return town.trading.runner!=null || TradeRoutes.canDepart(level,town); }
     private static Set<UUID> allowed(ServerLevel level) {
         Set<UUID> result=new LinkedHashSet<>();
-        SettlementData.get(level).settlements.stream().filter(t -> needed(level,t)).sorted(Comparator.comparing(t -> t.id))
+        // Autonomous NPC traffic uses spare capacity; it cannot fill the cap ahead of player-connected trade.
+        SettlementData.get(level).settlements.stream().filter(t -> needed(level,t))
+                .sorted(Comparator.comparingInt((Settlement t) -> t.trading.npc && TradeRoutes.partners(level,t).stream().allMatch(p -> p.trading.npc) ? 1 : 0)
+                        .thenComparing(t -> t.id))
                 .limit(Config.MAX_TRADERS.get()).forEach(t -> result.add(t.id));
         return result;
     }

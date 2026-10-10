@@ -65,8 +65,15 @@ public final class WWMC {
     public static final DeferredItem<BlockItem> TIN_ORE_ITEM=ITEMS.registerSimpleBlockItem(TIN_ORE),
             DEEPSLATE_TIN_ORE_ITEM=ITEMS.registerSimpleBlockItem(DEEPSLATE_TIN_ORE),TIN_BLOCK_ITEM=ITEMS.registerSimpleBlockItem(TIN_BLOCK),
             RAW_TIN_BLOCK_ITEM=ITEMS.registerSimpleBlockItem(RAW_TIN_BLOCK),BRONZE_BLOCK_ITEM=ITEMS.registerSimpleBlockItem(BRONZE_BLOCK);
-    public static final DeferredItem<Item> RAW_TIN=ITEMS.registerSimpleItem("raw_tin"),TIN_INGOT=ITEMS.registerSimpleItem("tin_ingot"),
-            BRONZE_BLEND=ITEMS.registerSimpleItem("bronze_blend"),BRONZE_INGOT=ITEMS.registerSimpleItem("bronze_ingot");
+    public static final DeferredItem<Item> RAW_TIN=material("raw_tin","tooltip.wwmc.raw_tin"),
+            TIN_INGOT=material("tin_ingot","tooltip.wwmc.tin_ingot"),
+            BRONZE_BLEND=material("bronze_blend","tooltip.wwmc.bronze_blend.craft","tooltip.wwmc.bronze_blend.smelt","tooltip.wwmc.bronze_blend.research"),
+            BRONZE_INGOT=ITEMS.registerSimpleItem("bronze_ingot");
+    private static DeferredItem<Item> material(String name,String... hints) {
+        return ITEMS.registerItem(name,Item::new,p -> p.component(DataComponents.LORE,
+                new net.minecraft.world.item.component.ItemLore(java.util.Arrays.stream(hints).map(Component::translatable)
+                        .map(c -> (Component)c).toList())));
+    }
     public static final DeferredItem<Item> BRONZE_SWORD=ITEMS.registerItem("bronze_sword",Item::new,p -> p.sword(BronzeEquipment.TOOLS,3,-2.4F));
     public static final DeferredItem<Item> BRONZE_PICKAXE=ITEMS.registerItem("bronze_pickaxe",Item::new,p -> p.pickaxe(BronzeEquipment.TOOLS,1,-2.8F));
     public static final DeferredItem<Item> BRONZE_AXE=ITEMS.registerItem("bronze_axe",Item::new,p -> p.axe(BronzeEquipment.TOOLS,6,-3.1F));
@@ -119,6 +126,8 @@ public final class WWMC {
         bus.addListener(io.github.swishhyy.wwmc.settlement.CitizenRecall::register);
         NeoForge.EVENT_BUS.register(new SettlementService());
         NeoForge.EVENT_BUS.register(new io.github.swishhyy.wwmc.settlement.ClaimProtection());
+        NeoForge.EVENT_BUS.register(new io.github.swishhyy.wwmc.settlement.MultiplayerCombat());
+        NeoForge.EVENT_BUS.register(new io.github.swishhyy.wwmc.settlement.MultiplayerCommands());
         NeoForge.EVENT_BUS.register(new Carcasses());
         NeoForge.EVENT_BUS.register(new io.github.swishhyy.wwmc.settlement.AgeProgression());
         NeoForge.EVENT_BUS.register(new WorkProtection());

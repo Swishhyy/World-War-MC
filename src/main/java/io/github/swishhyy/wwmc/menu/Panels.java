@@ -142,7 +142,8 @@ public final class Panels {
                     "Sends civilians to cover and every guard on duty, or ends the alarm"),
             new Action(RECRUIT,recruit,free>0,"A citizen needs a free housing bed and room under the population limit of "+limit),
             grow(town,viewer),new Action(CampaignViews.OPEN,"Campaign",true,"Warehouse requests, projects, squads, expedition sites and the town journal"),
-            new Action(RelationshipViews.OPEN,"Relationships",true,"Player permissions, invitations, alliances and town naming"));
+            new Action(RelationshipViews.OPEN,"Relationships",true,"Player permissions, invitations, alliances and town naming"),
+            new Action(MultiplayerViews.OPEN,"Neighbours",true,"Nearby towns, caravan deliveries, settlement contracts and news"));
         return new PanelView(Component.literal(town.name),Component.literal(town.citizens.size()+" citizens · "+jobs.assigned()+"/"+jobs.places()+" jobs · "
                 +(problems==0 ? "no needs" : problems+(problems==1 ? " need" : " needs"))),
                 List.of(new Tab("Overview",overview),new Tab("Needs",needs),new Tab("Jobs",jobRows(town,jobs)),new Tab("Citizens",people),new Tab("Stations",stations)),actions);
@@ -227,6 +228,7 @@ public final class Panels {
         switch(action) {
             case RelationshipViews.OPEN -> RelationshipViews.open(player,town);
             case CampaignViews.OPEN -> CampaignViews.open(player,town);
+            case MultiplayerViews.OPEN -> MultiplayerViews.open(player,town);
             case PRIORITY -> SettlementService.applyPreset(level,town,JobBoard.PRESETS.get((JobBoard.PRESETS.indexOf(town.priority)+1)%JobBoard.PRESETS.size()));
             case JOB -> {
                 if(key.startsWith("act:show:")) { show(player,town,key.substring(9)); return; }

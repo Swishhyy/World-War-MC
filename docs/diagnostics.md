@@ -17,6 +17,10 @@ Villager Colonies writes diagnostics to the hosting game's **console** and **`lo
 | `recipe-error` | A crafting recipe threw an exception while craftsmen indexed it. Includes the recipe ID and stack trace; other recipes remain usable. This always logs, even if routine diagnostics are disabled. |
 | `research-start` | A project spent its warehouse supplies once. Includes the town ID, project ID and required work ticks. |
 | `research-complete` | A working researcher completed the saved project and granted its unlock once. Includes the town and project IDs. |
+| `[contracts]` | A player supply offer reserved payment, was accepted, completed or cancelled. Includes its ID, settlement/player IDs and emerald amount. |
+| `[duels]` | A challenge, acceptance or result, including its stake, arena, winner and reason. |
+| `[outposts]` | A battle offer, consent, cancellation or capture of the existing outpost. |
+| `[multiplayer]` | Restart recovery refunded interrupted duel stakes and cancelled outpost challenges. Player supply contracts and pending payments remain saved. |
 
 Search attempts also use `citizen-search` at **DEBUG** level when the server's logging configuration enables it. Routine idle work, growing crops, replenishing veins, satisfied orders, sleeping citizens and off-duty work do not generate stall warnings. A warning describes an observed condition; it does not automatically mean the mod has a code bug.
 

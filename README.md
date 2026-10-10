@@ -19,6 +19,7 @@ Formerly **World War MC**. The internal `wwmc` namespace keeps existing worlds, 
 - **A working town:** named citizens, dedicated job stations, housing, warehouses, and couriers.
 - **Production:** farms, lumber work, mines, quarries, cooking, crafting, smelting, enchanting, and equipment repair.
 - **Friends and trade:** town permissions, alliances, and traders who carry goods between settlements.
+- **Settlement neighbours:** real caravans, paid supply contracts, nearby-town needs and quiet news at the banner. NPC towns arrange their own trade routes. See [settlement interactions](docs/multiplayer-campaign.md#settlement-neighbours).
 - **Defense and exploration:** guards, patrols, raids, bandit camps, and supplied outposts.
 - **Visible progress:** job outfits and work effects, town colors, upgrades, research, a visual handbook, and tutorial advancements.
 - **Settlement ages:** Stone → Bronze → Iron, with researchers, tin, bronze equipment, and shared unlocks for town members.

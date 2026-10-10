@@ -473,6 +473,21 @@ public final class CitizenEntity extends Villager {
         if(recovering || hospitalBed!=null) { leaveHospitalBed(); recovering=false; }
         if(isGuard()) leaveBed();
     }
+    @Override public float applyItemBlocking(ServerLevel level,DamageSource source,float amount) {
+        ItemStack blocking=getItemBlockingWith();
+        EquipmentSlot slot=getUsedItemHand().asEquipmentSlot();
+        float stopped=super.applyItemBlocking(level,source,amount);
+        // Vanilla's BlocksAttacks durability path only handles players; citizens spend the same real shield wear.
+        if(stopped>0 && blocking!=null && blocking.is(Items.SHIELD)) {
+            var rules=blocking.get(DataComponents.BLOCKS_ATTACKS);
+            if(rules!=null) {
+                int wear=rules.itemDamage().apply(stopped);
+                if(wear>0) blocking.hurtAndBreak(wear,this,slot);
+                if(blocking.isEmpty()) stopUsingItem();
+            }
+        }
+        return stopped;
+    }
     /** A guard post has an open place and guarding matters more than this citizen's own job, so it volunteers. */
     private boolean guardVacancy(ServerLevel level,Settlement town) {
         int guard=town.jobs.level(StructureRole.GUARD);
@@ -748,7 +763,7 @@ public final class CitizenEntity extends Villager {
         BlockPos obstacle=hit.getBlockPos();
         return hit.getType()==net.minecraft.world.phys.HitResult.Type.BLOCK && CitizenReach.within(eye,obstacle)
                 && level.hasChunkAt(obstacle) && town.contains(obstacle) && ForestryService.naturalLeaf(level.getBlockState(obstacle))
-                && !WorldWorkData.get(level).protectedBlocks.contains(obstacle) && !SettlementService.protectedFurniture(town,obstacle);
+                && !WorldWorkData.get(level).protectedBlocks.contains(obstacle) && !ForestryService.protectedFixture(town,obstacle);
     }
     /** The first natural leaf in reach, including leaves intersecting a worker who was already stuck in a canopy. */
     private BlockPos blockingLeaf(ServerLevel level,Settlement town) {
@@ -841,7 +856,7 @@ public final class CitizenEntity extends Villager {
         boolean guard=role==StructureRole.GUARD;
         return stack.is(ItemTags.AXES) && role==StructureRole.LUMBER
                 || stack.is(ItemTags.PICKAXES) && role!=null && role.excavates()
-                || guard && (GuardWeapons.melee(stack) && GuardWeapons.score(stack)>=bestMelee() || GuardWeapons.bow(stack) || GuardWeapons.arrow(stack)
+                || guard && (GuardWeapons.melee(stack) && GuardWeapons.score(stack)>=bestMelee() || GuardWeapons.bow(stack) || GuardWeapons.arrow(stack) || stack.is(Items.SHIELD)
                     || armor(stack) && Arrays.stream(GuardEquipment.ARMOR).anyMatch(slot -> GuardEquipment.upgrade(stack,getItemBySlot(slot),slot)))
                 || order!=null && order.uses(stack)
                 || craftJob!=null && role==StructureRole.CRAFTSMAN && craftJob.plan().uses(stack)
@@ -859,7 +874,7 @@ public final class CitizenEntity extends Villager {
     }
     /** Tools, weapons and armor that belong to particular jobs. */
     private static boolean gear(ItemStack stack) {
-        return stack.is(Items.FISHING_ROD) || GuardWeapons.weapon(stack) || GuardWeapons.arrow(stack) || stack.is(ItemTags.AXES) || stack.is(ItemTags.PICKAXES) || armor(stack);
+        return stack.is(Items.FISHING_ROD) || GuardWeapons.weapon(stack) || GuardWeapons.arrow(stack) || stack.is(Items.SHIELD) || stack.is(ItemTags.AXES) || stack.is(ItemTags.PICKAXES) || armor(stack);
     }
     /** A new job: put away the previous one's equipment and return it before starting. */
     private void changeRole(StructureRole role) {
@@ -1220,6 +1235,11 @@ public final class CitizenEntity extends Villager {
             ItemStack next=InventoryOps.takeBest(List.of(cargo),s -> GuardEquipment.upgrade(s,getItemBySlot(slot),slot),GuardEquipment::protection);
             if(!next.isEmpty()) { cargo.offer(getItemBySlot(slot)); setItemSlot(slot,next); }
         }
+        if(GuardEquipment.worn(getOffhandItem())) { if(isUsingItem()) stopUsingItem(); cargo.offer(getOffhandItem()); setItemSlot(EquipmentSlot.OFFHAND,ItemStack.EMPTY); }
+        if(!getOffhandItem().is(Items.SHIELD)) {
+            ItemStack shield=InventoryOps.takeOne(List.of(cargo),s -> s.is(Items.SHIELD) && GuardEquipment.usable(s));
+            if(!shield.isEmpty()) { cargo.offer(getOffhandItem()); setItemSlot(EquipmentSlot.OFFHAND,shield); }
+        }
     }
     private int arrows() { return InventoryOps.count(List.of(cargo),GuardWeapons::arrow); }
     private boolean carries(Predicate<ItemStack> kind) { return GuardEquipment.usable(getMainHandItem()) && kind.test(getMainHandItem())
@@ -1239,6 +1259,8 @@ public final class CitizenEntity extends Villager {
                         && GuardEquipment.protection(s)>=GuardEquipment.protection(stack))==0;
         if(GuardWeapons.melee(stack)) return GuardWeapons.score(stack)>bestMelee()+MELEE_UPGRADE;
         if(GuardWeapons.bow(stack)) return !carries(GuardWeapons::bow);
+        if(stack.is(Items.SHIELD)) return (!getOffhandItem().is(Items.SHIELD) || !GuardEquipment.usable(getOffhandItem()))
+                && cargo.first(s -> s.is(Items.SHIELD) && GuardEquipment.usable(s)).isEmpty();
         return GuardWeapons.arrow(stack) && carries(GuardWeapons::bow) && arrows()<ARROW_STOCK;
     }
     private int wanted(ItemStack stack) { return GuardWeapons.arrow(stack) ? Math.min(stack.getCount(),ARROW_STOCK-arrows()) : 1; }
@@ -1255,6 +1277,8 @@ public final class CitizenEntity extends Villager {
     }
     /** Off the firing line a guard carries their strongest melee weapon, or the bow if that is all they have. */
     private void readyMelee() {
+        // The work scheduler runs every ten ticks; drawing a bow takes twenty. Never replace a drawing bow.
+        if(isUsingItem() && getUsedItemHand()==InteractionHand.MAIN_HAND && GuardWeapons.bow(getMainHandItem())) return;
         double held=GuardWeapons.score(getMainHandItem());
         ItemStack better=InventoryOps.takeBest(List.of(cargo),s -> GuardEquipment.usable(s) && GuardWeapons.score(s)>held,GuardWeapons::score);
         if(!better.isEmpty()) wield(better);
@@ -1272,6 +1296,11 @@ public final class CitizenEntity extends Villager {
             ItemStack bow=InventoryOps.takeOne(storage,s -> GuardWeapons.bow(s) && GuardEquipment.usable(s));
             if(!bow.isEmpty()) cargo.offer(bow);
         }
+        if(needs(new ItemStack(Items.SHIELD))) {
+            ItemStack shield=InventoryOps.takeOne(storage,s -> s.is(Items.SHIELD) && GuardEquipment.usable(s));
+            if(!shield.isEmpty()) cargo.offer(shield);
+        }
+        wearLocalArmor();
         while(carries(GuardWeapons::bow) && arrows()<ARROW_STOCK) {
             ItemStack arrow=InventoryOps.takeOne(storage,GuardWeapons::arrow);
             if(arrow.isEmpty()) break;
@@ -1304,7 +1333,7 @@ public final class CitizenEntity extends Villager {
                 cargo.offer(held.split(wanted(held)));
                 stand.setItemSlot(slot,held.isEmpty() ? ItemStack.EMPTY : held);
             }
-            readyMelee();
+            wearLocalArmor(); readyMelee();
             swing(InteractionHand.MAIN_HAND); return false;
         }
         return false;
@@ -1454,23 +1483,33 @@ public final class CitizenEntity extends Villager {
         setTarget(enemy); activity="Defending the settlement";
         getLookControl().setLookAt(enemy,30.0F,30.0F);
         double distance=distanceTo(enemy);
+        Settlement town=town(level);
+        BlockPos post=town==null ? null : town.jobs.home(getUUID());
+        String role=post==null ? GuardPosts.SWORD : GuardRoles.role(level,post);
+        boolean shield=GuardPosts.SHIELD.equals(role) && getOffhandItem().is(Items.SHIELD) && GuardEquipment.usable(getOffhandItem());
         // Archers shoot at range with real arrows, switching to a melee weapon once the enemy closes in.
-        if(distance>GuardWeapons.BOW_MIN_RANGE && distance<=GuardWeapons.BOW_MAX_RANGE && arrows()>0
+        if(!shield && distance>(GuardPosts.ARCHER.equals(role) ? 3 : GuardWeapons.BOW_MIN_RANGE) && distance<=GuardWeapons.BOW_MAX_RANGE && arrows()>0
                 && hasLineOfSight(enemy) && carries(GuardWeapons::bow) && clearShot(level,enemy) && hold(GuardWeapons::bow)) {
             getNavigation().stop(); activity="Shooting at an attacker";
+            if(isUsingItem() && getUsedItemHand()!=InteractionHand.MAIN_HAND) stopUsingItem();
             if(!isUsingItem()) { if(guardAttackTicks==0) startUsingItem(InteractionHand.MAIN_HAND); }
             else if(getTicksUsingItem()>=20) { stopUsingItem(); shoot(level,enemy); guardAttackTicks=CitizenSkill.guardCooldown(skillLevel(StructureRole.GUARD),getRandom().nextInt(100)); }
             return;
         }
-        if(isUsingItem()) stopUsingItem();
+        // Tool-work reach is wider than a native melee swing. Keep approaching until an attack can land.
+        boolean inReach=isWithinMeleeAttackRange(enemy) && hasLineOfSight(enemy);
+        if(shield && (!inReach || guardAttackTicks>0)) {
+            if(isUsingItem() && getUsedItemHand()!=InteractionHand.OFF_HAND) stopUsingItem();
+            if(!isUsingItem()) startUsingItem(InteractionHand.OFF_HAND);
+        } else if(isUsingItem()) stopUsingItem();
         // Without a melee weapon, put the bow away and fight with fists instead of wearing it out.
         if(!hold(GuardWeapons::melee) && GuardWeapons.bow(getMainHandItem())) wield(ItemStack.EMPTY);
-        if(CitizenReach.within(getEyePosition(),enemy.getBoundingBox()) && hasLineOfSight(enemy)) {
+        if(inReach) {
             getNavigation().stop();
             if(guardAttackTicks==0) {
                 swing(InteractionHand.MAIN_HAND);
                 if(doHurtTarget(level,enemy) && GuardWeapons.melee(getMainHandItem())) getMainHandItem().hurtAndBreak(1,this,EquipmentSlot.MAINHAND);
-                guardAttackTicks=CitizenSkill.guardCooldown(skillLevel(StructureRole.GUARD),getRandom().nextInt(100));
+                guardAttackTicks=shield ? 20 : CitizenSkill.guardCooldown(skillLevel(StructureRole.GUARD),getRandom().nextInt(100));
             }
         } else walk(enemy.blockPosition(),0.8);
     }
@@ -1525,6 +1564,7 @@ public final class CitizenEntity extends Villager {
         for(EquipmentSlot slot:GuardEquipment.ARMOR) if(GuardEquipment.worn(getItemBySlot(slot))) {
             cargo.offer(getItemBySlot(slot)); setItemSlot(slot,ItemStack.EMPTY);
         }
+        wearLocalArmor();
         BlockPos bell=DefenseService.bellRun(town,getUUID());
         boolean alarm=DefenseService.alarmed(town);
         LivingEntity aggressor=combatEnemy==null ? null : level.getEntity(combatEnemy) instanceof LivingEntity living ? living : null;
@@ -2395,11 +2435,12 @@ public final class CitizenEntity extends Villager {
                 BlockPos targetWarehouse=tradeWarehouse(destination);
                 if(targetWarehouse!=null) SupplyRequests.snapshotLoaded(level,destination);
                 boolean depot=home.campaign.projects.contains("depot"); tradeShipment.capacity=TradeSettings.MAX_EXPORTS*(depot ? 2 : 1);
-                int moved=TradeGoods.load(SettlementService.storageAt(level,home,warehouse),SupplyRequests.policy(home,destination,depot),tradeShipment);
+                int moved=PlayerContracts.load(level,home,destination,SettlementService.storageAt(level,home,warehouse),SupplyRequests.policy(home,destination,depot),tradeShipment,depot);
                 if(moved==0) { home.campaign.routeCursor++; SettlementData.get(level).setDirty(); tradeNote(home,"Waiting for requested goods above the home reserves; checking another route next"); nextTradeAt=level.getGameTime()+200; return; }
                 tradeShipment.destination=destination.id; tradeShipment.stage="checkpoint"; tradeNavigation.reset();
                 destination.campaign.incoming.put(getUUID(),CampaignContracts.counts(tradeShipment));
-                CampaignService.record(level,home,"Shipment departed for "+destination.name+" with "+moved+" items.");
+                CampaignService.journal(level,home,"Shipment departed for "+destination.name+" with "+moved+" items.");
+                WWMC.LOGGER.info("[WWMC] [trade] Carrier {} departed {} for {} with {} items",getUUID(),home.id,destination.id,moved);
             }
             case "checkpoint" -> {
                 tradeNote(home,"Taking "+tradeCargoCount()+" items to the home checkpoint");
@@ -2415,13 +2456,18 @@ public final class CitizenEntity extends Villager {
                 tradeNote(home,"Delivering to "+destination.name+"'s warehouse");
                 if(!tradeArrive(level,home,warehouse)) return;
                 var before=CampaignContracts.counts(tradeShipment);
+                var plainBefore=PlayerContracts.plainCounts(tradeShipment);
                 int moved=TradeGoods.unload(tradeShipment,SettlementService.storageAt(level,destination,warehouse));
                 var remaining=CampaignContracts.counts(tradeShipment);
                 if(remaining.isEmpty()) destination.campaign.incoming.remove(getUUID()); else destination.campaign.incoming.put(getUUID(),remaining);
                 before.replaceAll((key,count) -> count-remaining.getOrDefault(key,0)); before.values().removeIf(count -> count<=0);
+                var plainRemaining=PlayerContracts.plainCounts(tradeShipment);
+                plainBefore.replaceAll((key,count) -> count-plainRemaining.getOrDefault(key,0)); plainBefore.values().removeIf(count -> count<=0);
                 if(moved>0) {
                     CampaignContracts.delivered(level,home,destination,before,tradeShipment.rewards);
-                    CampaignService.record(level,destination,"Received "+moved+" items from "+home.name+".");
+                    PlayerContracts.delivered(level,home,destination,plainBefore);
+                    CampaignService.journal(level,destination,"Received "+moved+" items from "+home.name+".");
+                    WWMC.LOGGER.info("[WWMC] [trade] Carrier {} delivered {} items from {} to {}",getUUID(),moved,home.id,destination.id);
                     SupplyRequests.snapshotLoaded(level,destination);
                 }
                 home.trading.delivered+=moved;

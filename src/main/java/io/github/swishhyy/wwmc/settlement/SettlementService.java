@@ -104,6 +104,10 @@ public final class SettlementService {
         SettlementData data=SettlementData.get(level);
         Settlement present=data.at(pos);
         if(present!=null) {
+            if(player instanceof ServerPlayer visitor && present.center.equals(pos) && !present.trading.npc
+                    && !TownAccess.builds(present,player.getUUID()) && !TownAccess.invited(present,player.getUUID())) {
+                MultiplayerViews.open(visitor,present); return;
+            }
             if(player instanceof ServerPlayer viewer && (TownAccess.builds(present,player.getUUID()) || TownAccess.invited(present,player.getUUID()))) {
                 if(owns(player,present) && present.center.equals(pos)) Panels.openTown(viewer,present);
                 else RelationshipViews.open(viewer,present,pos);

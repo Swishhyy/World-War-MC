@@ -62,6 +62,58 @@ public final class VillagerAIWorldTests {
         level.setBlockAndUpdate(foot,state.setValue(BedBlock.PART,BedPart.FOOT));
         level.setBlockAndUpdate(foot.north(),state.setValue(BedBlock.PART,BedPart.HEAD));
     }
+    @GameTest(timeoutTicks=750)
+    @EmptyTemplate
+    @TestHolder(description="An archer carrying both a bow and sword fires real arrows without approaching melee range, spends arrows and bow durability, then approaches and uses its sword when ammunition runs out.")
+    static void archerDrawSurvivesWorkTicks(DynamicTest test) {
+        test.onGameTest(helper -> {
+            var level=helper.getLevel(); BlockPos start=helper.absolutePos(new BlockPos(0,2,-10000));
+            Station post=new Station(start.east(2),StructureRole.GUARD); var f=fixture(level,start,post);
+            WorldWorkData.get(level).guardPosts.put(post.position(),new GuardPosts(post.position(),post.position(),post.position()).withRole(GuardPosts.ARCHER));
+            var guard=f.worker(start.east(4),post); guard.setItemSlot(EquipmentSlot.MAINHAND,new ItemStack(Items.BOW));
+            guard.bag().offer(new ItemStack(Items.IRON_SWORD)); guard.bag().offer(new ItemStack(Items.ARROW,24));
+            var enemy=zombie(level,start.east(18)); enemy.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200); enemy.setHealth(200);
+            helper.runAtTickTime(220,() -> {
+                helper.assertTrue(enemy.getHealth()<200,"Archer never landed a shot: "+guard.activity());
+                helper.assertTrue(guard.bag().count(Items.ARROW)<24 && guard.getMainHandItem().is(Items.BOW) && guard.getMainHandItem().getDamageValue()>0,"Ranged defense did not consume real arrows and bow durability");
+                helper.assertTrue(guard.distanceTo(enemy)>GuardWeapons.BOW_MIN_RANGE,"Archer approached melee range despite ammunition");
+                for(int slot=0;slot<guard.bag().getContainerSize();slot++) if(guard.bag().getItem(slot).is(Items.ARROW)) guard.bag().setItem(slot,ItemStack.EMPTY);
+                float before=enemy.getHealth();
+                helper.succeedWhen(() -> {
+                    helper.assertTrue(guard.getMainHandItem().is(Items.IRON_SWORD) && guard.distanceTo(enemy)<5 && enemy.getHealth()<before,"Out-of-ammo archer did not fall back to melee: "+guard.activity());
+                    enemy.discard(); f.close();
+                });
+            });
+        });
+    }
+    @GameTest(timeoutTicks=400)
+    @EmptyTemplate
+    @TestHolder(description="A shield guard collects a real shield from a stand, blocks frontal damage with native shield use and durability, takes rear damage, and continues attacking between blocks.")
+    static void shieldGuardUsesAndResuppliesShield(DynamicTest test) {
+        test.onGameTest(helper -> {
+            var level=helper.getLevel(); BlockPos start=helper.absolutePos(new BlockPos(0,2,-10200));
+            Station post=new Station(start.east(10),StructureRole.GUARD); var f=fixture(level,start,post);
+            WorldWorkData.get(level).guardPosts.put(post.position(),new GuardPosts(post.position(),post.position(),post.position()).withRole(GuardPosts.SHIELD));
+            var guard=f.worker(post.position().west(),post); guard.setItemSlot(EquipmentSlot.MAINHAND,new ItemStack(Items.IRON_SWORD));
+            var stand=new net.minecraft.world.entity.decoration.ArmorStand(level,guard.getX(),guard.getY(),guard.getZ()+1);
+            ItemStack shield=new ItemStack(Items.SHIELD); shield.setDamageValue(7); stand.setItemSlot(EquipmentSlot.OFFHAND,shield); level.addFreshEntity(stand);
+            helper.runAtTickTime(80,() -> {
+                helper.assertTrue(guard.getOffhandItem().is(Items.SHIELD) && guard.getOffhandItem().getDamageValue()==7 && stand.getOffhandItem().isEmpty(),"Guard did not collect the actual shield from the stand: "+guard.activity());
+                var enemy=zombie(level,guard.blockPosition().south(3)); enemy.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200); enemy.setHealth(200);
+                helper.succeedWhen(() -> {
+                    helper.assertTrue(guard.isBlocking() && guard.getTicksUsingItem()>=5 && enemy.getHealth()<190,"Shield guard did not attack and raise its shield between attacks: "+guard.activity()+", blocking="+guard.isBlocking()+", useTicks="+guard.getTicksUsingItem()+", enemyHealth="+enemy.getHealth()+", distance="+guard.distanceTo(enemy));
+                    guard.setYRot(0); guard.setYHeadRot(0);
+                    enemy.setPos(guard.getX(),guard.getY(),guard.getZ()+3); float health=guard.getHealth();
+                    guard.hurtServer(level,level.damageSources().mobAttack(enemy),6);
+                    helper.assertTrue(guard.getHealth()==health && guard.getOffhandItem().getDamageValue()>7,"A frontal hit was not blocked by the real shield");
+                    enemy.setPos(guard.getX(),guard.getY(),guard.getZ()-3); guard.invulnerableTime=0;
+                    guard.hurtServer(level,level.damageSources().mobAttack(enemy),6);
+                    helper.assertTrue(guard.getHealth()<health,"Shield incorrectly blocked rear damage");
+                    stand.discard(); enemy.discard(); f.close();
+                });
+            });
+        });
+    }
     private static void trap(ServerLevel level,BlockPos feet) {
         for(int y=0;y<3;y++) for(BlockPos side:List.of(feet.north(),feet.south(),feet.east(),feet.west()))
             level.setBlockAndUpdate(side.above(y),Blocks.STONE.defaultBlockState());

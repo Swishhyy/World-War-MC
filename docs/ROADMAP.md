@@ -51,6 +51,8 @@ Hospital capacity is separate from permanent population capacity. Barracks housi
 
 ## Warfare and world progression
 
+The open development branch adds player supply contracts, staked nonlethal duels and mutually approved expedition outpost capture. These are the first player-versus-player interactions. Full settlement wars, rival-player targeting by guards/traps, convoy raids, peace treaties, tribute and tournaments remain future work. See [multiplayer rules](multiplayer-campaign.md#contested-resource-outposts) for the implemented outpost battle limits.
+
 Town guards currently wear visible armor, find their own swords, spears, bows, and arrows, patrol day/night posts, answer civilians' calls about hostiles, and ring the town bell when a large force appears. Population-scaled monster waves test those defenses; buying a larger population makes them grow and brings pillagers and vindicators, and stragglers glow and are hunted down. Training and coordinated squads come next after the economy works reliably; raids by rival settlements will reuse the alarm and wave machinery. Soldiers consume equipment and food from actual production. Convoys have persistent IDs, source/destination, real reserved cargo, escort strength, and progress. Visible convoys instantiate that same cargo; raiding them consumes or transfers it once and affects the recipient's economy.
 
 Independent settlements can grow into countries composed of multiple towns and shared territory. Local factions may have simpler technology alongside different terrain knowledge, motives, and combat strengths. Technology research should unlock actual production capabilities; its final ceiling is not decided yet.

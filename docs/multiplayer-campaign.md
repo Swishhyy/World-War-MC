@@ -16,7 +16,7 @@ Industry choices improve only their matching work: farming harvests, fishing cat
 
 ## Relationships, claims and flags
 
-Player towns deny interaction to everyone except their owner and accepted builders or stewards. This applies throughout the saved square claim, at every height, including existing towns. Visitors may walk through, but cannot mine or place blocks, open containers, use doors or other blocks, use buckets, trample crops, or interact with or attack entities there. Pistons cannot move blocks across a claim border. TNT ignited by an unauthorized player cannot destroy the claimed blocks. Natural hostiles still threaten ordinary buildings and citizens; flags survive explosions. NPC towns retain their existing neutral trading and combat rules.
+Player towns deny interaction to everyone except their owner and accepted builders or stewards. This applies throughout the saved square claim, at every height, including existing towns. Visitors may walk through, but cannot mine or place blocks, open containers, use doors, use buckets, trample crops, or interact with or attack entities there. With an empty hand they can open the **main banner's public Neighbours board**; this grants no building, storage, citizen or research access. An active agreed outpost battle makes a narrow exception for combat between its consenting players. Pistons cannot move blocks across a claim border. TNT ignited by an unauthorized player cannot destroy the claimed blocks. Natural hostiles still threaten ordinary buildings and citizens; flags survive explosions. NPC towns retain their existing neutral trading and combat rules.
 
 The Relationships **Players** tab shows online players plus accepted members and pending invitations, retaining saved names for offline members. Its permission button cycles Denied, Builder and Steward. New access waits for acceptance on **Invitations**; changing an accepted member's role applies immediately. The × button revokes access and cancels invitations. Revocation also closes that player's current container. The owner alone changes permissions and alliances. Pending invitees can use only the flag's invitation screen until acceptance.
 
@@ -25,6 +25,36 @@ On **Settlements**, propose, accept, decline or cancel alliances. Mutual consent
 Settlement flags have high blast resistance, are removed from explosion destruction lists, and cannot be pushed by pistons. Owners can still deliberately remove an empty town's flag. An occupied town's flag remains its fixed rally point.
 
 If a flag disappeared in an older build, its occupied town keeps the original identity and claim. Place a Settlement Banner at the saved flag coordinates and right-click it to reopen the same town. Alternatively, right-click another Settlement Banner inside that claim to open Relationships, read the original coordinates on **Town**, and use **Restore flag** while carrying one replacement in your inventory. Recovery consumes that item only after success, never overwrites another block, and preserves population, stations, assignments, memberships and routes. `/wwmc town recover` remains an optional shortcut while standing inside that claim.
+
+## Settlement neighbours
+
+Open **Neighbours** at your main settlement banner. The first tab lists discovered towns within the configured trade distance, their public stock shortages, relationships, flags and your caravan status. Needs use last known warehouse stock minus incoming shipments; unloaded storage is not simulated. Propose or confirm a route here, accept an NPC supply request, or propose a player-town alliance. Route proposals between players still require both sides to agree. Alliances do not grant claim access or equipment research.
+
+Completed, loaded NPC towns arrange up to **two reciprocal neighbour routes**, preferring towns with a different industry. They use their existing citizen trader, warehouse stock, food reserves and ordinary road/bridge navigation. Their primary checkpoint remains available for player trade. Paused, hostile, unfinished or unloaded towns do not form new routes. There are no generated shipment rewards or extra caravan citizens. NPC imports target bread, carrots, timber, iron and furnace fuel; ordinary stock controls keep their own supplies reserved. Autonomous NPC caravans use spare slots within the existing server trader limit; player-connected trade takes priority.
+
+**News** collects your own town's journal and public news from nearby NPC towns: new trade agreements, arrivals, supply requests and food-funded population growth. Other player towns' private journals remain private. Routine shipments and neighbour opportunities stay on the board instead of interrupting chat or the hotbar. Caravan departure/delivery and contract payouts are also written to the server console.
+
+## Player supply contracts
+
+Open **Neighbours > Contracts** at a main settlement banner. Owners and stewards hold a plain, undamaged example of what they want, choose **1–256 items** and **1–64 emeralds**, then click **Post**. The example remains yours. The complete payment comes from the publisher's inventory and is reserved immediately. Each main settlement can have eight active offers; the world can have 64.
+
+Another settlement's owner or steward clicks **Accept**. The board shows which main settlement they are supplying for. Acceptance is exclusive, and payment goes to the player accepting the order. Carry plain requested items to the issuing town's banner, open its public board with an empty hand, and click **Deliver**. Goods move directly into its loaded warehouse. A full warehouse accepts only what fits; the remaining goods stay in your inventory and the payment remains reserved. **Trader delivery also works:** connect an agreed primary route, or an allied extra route after a Depot. Assign the Trader Block and stock the supplier's warehouse. Accepted contracts add shipment demand without changing the issuer's normal targets. The trader carries plain goods above the supplier's configured home reserves; credit and payment happen only after the real destination warehouse accepts them. Incoming shipments reserve demand. Full storage leaves the carrier holding the remainder. The contract row shows missing routes, paused trade, broken checkpoints or an unstaffed trader.
+
+The publisher can cancel an **unaccepted** offer and collect the refund. An accepted supplier can **Release** an order; delivered goods remain credited and another supplier can finish the remaining request. Accepted contracts survive logout and restart without an offline deadline. If an issuing settlement disappears, the original publisher's reserved payment is refunded.
+
+Completed payments and refunds appear in your banner payment balance. **Collect payment** moves only what fits in your inventory; the remainder stays saved. `/wwmc payment collect` also works in the Overworld. Orders and transfers are logged in the server console; normal board actions use the hotbar instead of repeated chat messages.
+
+Optional commands: `/wwmc neighbours` (or the existing `/wwmc multiplayer` alias), `/wwmc playercontract list`, `/wwmc playercontract post <amount> <emeralds>` while holding the example at your banner, and `/wwmc playercontract accept|deliver|cancel|release <id>`.
+
+## Contested resource outposts
+
+**Neighbours > Outposts** lists expedition resource outposts and battle offers. A main settlement owner with **Frontier Charter** and a free extra supply route can challenge a non-allied settlement's outpost. The defending main settlement owner must **Accept**; an unanswered offer changes no permissions or ownership. Both owners must remain online in the Overworld.
+
+After acceptance, there is **one minute to assemble**, followed by a **five-minute battle**. Only accepted members of the two main settlements can exchange player damage inside the **32-block area around the outpost flag**. A player belonging to both settlements is neutral. Normal PvP death and drops apply. Storage, building permissions, citizens, guards and other claims retain their normal protection; guards continue their ordinary monster defense. Settlement wars and guards fighting rival players remain future work.
+
+Attackers capture by standing within **six blocks of the flag for 60 seconds**, with no defender within **16 blocks**. Both sides present pauses progress; no attacker present reduces it. Defenders win if time runs out. Offline owners, changed alliances/authority or a server restart cancel the battle without transferring ownership.
+
+Capture changes the **existing outpost**: its miners, stored goods and ore vein remain, the former parent's route is removed, and a supply route connects it to the winning settlement. Permissions and equipment progression follow the new parent; capture does not award the defeated town's research. Review offers and outcomes in **Campaign > Journal**. Commands: `/wwmc outpost battle list`, `challenge <outpost-id>`, `accept <battle-id>` and `decline <battle-id>`.
 
 ## Stock targets and routes
 
@@ -179,3 +209,5 @@ For personal deliveries or remaining reward collection, bring goods to the reque
 Town commands select the managed town you stand inside, then a town whose squad you lead, then your nearest managed town. Membership and alliance changes always require the immutable owner. Campaign board actions require being within eight blocks of the banner; field orders remain available away from it. All authority and item movement are checked on the server.
 
 Expedition settings stay in the existing flat server config and its **World** section: `expeditionSites`, `maxExpeditionSites` (64), `maxExpeditionBandits` (48), and `convoyRaids`.
+
+Preview saves containing the removed duel feature refund only previously reserved stakes into each player's payment balance when loaded. Duels have no banner tab, command or combat exception.

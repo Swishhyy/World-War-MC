@@ -7,6 +7,7 @@ import io.github.swishhyy.wwmc.menu.WwmcNetwork;
 import io.github.swishhyy.wwmc.settlement.JobBoard;
 import io.github.swishhyy.wwmc.settlement.CampaignViews;
 import io.github.swishhyy.wwmc.settlement.RelationshipViews;
+import io.github.swishhyy.wwmc.settlement.MultiplayerViews;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -37,7 +38,7 @@ public final class PanelScreen extends AbstractContainerScreen<PanelMenu> {
     private PanelView view() { return menu.view(); }
     private void openHelp() {
         if(menu.kind==PanelMenu.Kind.STATION && minecraft.level!=null && minecraft.level.getBlockState(menu.pos).getBlock() instanceof io.github.swishhyy.wwmc.block.StationBlock station) { GuideScreen.openStation(this,station.role()); return; }
-        GuideScreen.open(this,switch(menu.kind) { case RELATIONSHIPS -> "relationships"; case CAMPAIGN,ARMY -> "frontier"; default -> "start"; });
+        GuideScreen.open(this,switch(menu.kind) { case MULTIPLAYER -> "multiplayer"; case RELATIONSHIPS -> "relationships"; case CAMPAIGN,ARMY -> "frontier"; default -> "start"; });
     }
     @Override protected void init() {
         if(townName!=null) nameDraft=townName.getValue();
@@ -102,10 +103,20 @@ public final class PanelScreen extends AbstractContainerScreen<PanelMenu> {
             if(row.key().startsWith("act:")) {
                 String label=row.key().startsWith("act:show:") ? "Show" : row.key().startsWith("act:research:") ? "Study" : row.key().startsWith("act:project:") ? "Build" : row.key().startsWith("act:accept:") ? "Accept" : row.key().startsWith("act:decline:") ? "Decline"
                         : row.key().startsWith("act:unally:") ? "End / cancel" : row.key().startsWith("act:ally:") ? "Ally" : "Use";
-                int width=menu.kind==PanelMenu.Kind.RELATIONSHIPS ? 76 : 32;
+                if(menu.kind==PanelMenu.Kind.MULTIPLAYER) label=row.key().contains("-accept") ? "Accept" : row.key().contains("-challenge") ? "Challenge" : row.key().contains("-deliver") ? "Deliver"
+                        : row.key().contains("-release") ? "Release" : row.key().contains("-post") ? "Post" : row.key().contains("-decline") ? "Decline" : "Cancel";
+                int width=menu.kind==PanelMenu.Kind.RELATIONSHIPS || menu.kind==PanelMenu.Kind.MULTIPLAYER ? 76 : 32;
                 Button use=Button.builder(Component.literal(label),b -> { b.active=false; send(index,1,row.key()); })
                         .bounds(right-width-1,rowY,width,15).build();
                 use.active=row.value()==0; use.setTooltip(Tooltip.create(row.detail())); addRenderableWidget(use); continue;
+            }
+            if(menu.kind==PanelMenu.Kind.MULTIPLAYER && row.key().startsWith("choice:")) {
+                int step=row.key().equals("choice:amount") ? 16 : 1,min=row.key().equals("choice:stake") ? 0 : 1,max=row.key().equals("choice:amount") ? 256 : 64;
+                Button lower=Button.builder(Component.literal("-"),b -> { b.active=false; send(index,Math.max(min,row.value()-step),row.key()); }).bounds(right-31,rowY,14,15).build();
+                Button raise=Button.builder(Component.literal("+"),b -> { b.active=false; send(index,Math.min(max,row.value()+step),row.key()); }).bounds(right-15,rowY,14,15).build();
+                lower.active=row.value()>min; raise.active=row.value()<max;
+                lower.setTooltip(Tooltip.create(Component.literal("Lower by "+step))); raise.setTooltip(Tooltip.create(Component.literal("Raise by "+step)));
+                addRenderableWidget(lower); addRenderableWidget(raise); continue;
             }
             boolean request=row.key().startsWith("request:"),member=row.key().startsWith("member:");
             int step=request ? row.icon().getMaxStackSize()==1 ? 1 : 16 : 1;
@@ -124,12 +135,12 @@ public final class PanelScreen extends AbstractContainerScreen<PanelMenu> {
     private static boolean control(PanelView.Row row) { return !row.key().isEmpty() && row.value()>=0; }
     private void send(int index,int value,String key) {
         ClientPacketDistributor.sendToServer(new WwmcNetwork.ActionPayload(menu.containerId,
-                menu.kind==PanelMenu.Kind.RELATIONSHIPS ? RelationshipViews.ROW_ACTION : menu.kind==PanelMenu.Kind.CAMPAIGN || menu.kind==PanelMenu.Kind.ARMY ? CampaignViews.ROW_ACTION : Panels.JOB,index,value,key));
+                menu.kind==PanelMenu.Kind.MULTIPLAYER ? MultiplayerViews.ROW_ACTION : menu.kind==PanelMenu.Kind.RELATIONSHIPS ? RelationshipViews.ROW_ACTION : menu.kind==PanelMenu.Kind.CAMPAIGN || menu.kind==PanelMenu.Kind.ARMY ? CampaignViews.ROW_ACTION : Panels.JOB,index,value,key));
     }
     private boolean naming() { return menu.kind==PanelMenu.Kind.RELATIONSHIPS && tab==3; }
     private int listTop() { return naming() ? LIST_TOP+24 : LIST_TOP; }
     private List<PanelView.Action> footerActions() { return view().actions().stream().filter(a -> a.id()!=RelationshipViews.RENAME).toList(); }
-    private int controlWidth(PanelView.Row row) { return !control(row) ? 0 : menu.kind==PanelMenu.Kind.RELATIONSHIPS ? 80 : 34; }
+    private int controlWidth(PanelView.Row row) { return !control(row) ? 0 : menu.kind==PanelMenu.Kind.RELATIONSHIPS || menu.kind==PanelMenu.Kind.MULTIPLAYER && row.key().startsWith("act:") ? 80 : 34; }
     private void rename() { if(townName!=null) ClientPacketDistributor.sendToServer(new WwmcNetwork.ActionPayload(menu.containerId,RelationshipViews.RENAME,0,0,townName.getValue())); }
     @Override public boolean keyPressed(KeyEvent event) {
         if(townName!=null && townName.isFocused() && event.key()!=256) {

@@ -10,15 +10,18 @@ import net.minecraft.world.item.Items;
 public final class TradeGoods {
     private TradeGoods() {}
     public static int load(List<Container> warehouse,List<TradeSettings.Export> policy,TradeShipment shipment) {
+        return load(warehouse,policy,shipment,(item,stack) -> true);
+    }
+    public static int load(List<Container> warehouse,List<TradeSettings.Export> policy,TradeShipment shipment,java.util.function.BiPredicate<Item,ItemStack> accepts) {
         int moved=0;
         for(var order:policy) {
             Item item=order.resolve();
             if(item==null || item==Items.AIR || order.load()==0) continue;
-            int surplus=Math.max(0,InventoryOps.count(warehouse,s -> s.is(item))-order.reserve());
+            int surplus=Math.max(0,InventoryOps.count(warehouse,s -> s.is(item) && accepts.test(item,s))-order.reserve());
             int remaining=Math.min(surplus,order.load());
             for(Container source:warehouse) for(int slot=0;slot<source.getContainerSize() && remaining>0;slot++) {
                 ItemStack original=source.getItem(slot);
-                if(!original.is(item)) continue;
+                if(!original.is(item) || !accepts.test(item,original)) continue;
                 int amount=Math.min(remaining,original.getCount());
                 ItemStack rest=InventoryOps.insert(shipment,original.copyWithCount(amount));
                 int accepted=amount-rest.getCount();

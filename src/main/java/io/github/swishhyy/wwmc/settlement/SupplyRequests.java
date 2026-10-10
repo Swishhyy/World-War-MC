@@ -13,7 +13,7 @@ import io.github.swishhyy.wwmc.core.StructureRole;
 public final class SupplyRequests {
     private SupplyRequests() {}
     public static Item item(String key) {
-        Identifier id=Identifier.tryParse(key); return id==null ? Items.AIR : BuiltInRegistries.ITEM.getValue(id);
+        Identifier id=Identifier.tryParse(key); Item item=id==null ? null : BuiltInRegistries.ITEM.getValue(id); return item==null ? Items.AIR : item;
     }
     public static boolean set(Settlement town,String key,int target) {
         Item item=item(key); if(item==null || item==Items.AIR || target<0 || target>4096) return false;
@@ -28,7 +28,7 @@ public final class SupplyRequests {
         for(Container box:stock) for(int slot=0;slot<box.getContainerSize();slot++) {
             var stack=box.getItem(slot); if(!stack.isEmpty()) town.campaign.stock.merge(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString(),stack.getCount(),Integer::sum);
         }
-        if(town.trading.npc) CampaignContracts.refreshDemands(town);
+        if(town.trading.npc) { NeighbourTrade.refreshRequests(town); CampaignContracts.refreshDemands(town); }
     }
     public static void snapshotLoaded(ServerLevel level,Settlement town) {
         var warehouses=town.stations.stream().filter(s -> s.role()==StructureRole.WAREHOUSE).toList();

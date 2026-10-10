@@ -38,8 +38,8 @@ public final class CampaignContracts {
     }
     private static void refreshDemand(Settlement npc,String item) {
         int required=npc.campaign.contracts.stream().filter(c -> c.item.equals(item) && c.customer!=null).mapToInt(SupplyContract::remaining).sum();
-        if(required>0) npc.campaign.requests.put(item,Math.min(4096,npc.campaign.stock.getOrDefault(item,0)+required));
-        else npc.campaign.requests.remove(item);
+        int target=Math.max(NeighbourTrade.baseTarget(npc,item),required>0 ? Math.min(4096,npc.campaign.stock.getOrDefault(item,0)+required) : 0);
+        if(target>0) npc.campaign.requests.put(item,target); else npc.campaign.requests.remove(item);
     }
     public static void refreshDemands(Settlement npc) {
         npc.campaign.contracts.stream().map(c -> c.item).distinct().forEach(item -> refreshDemand(npc,item));
