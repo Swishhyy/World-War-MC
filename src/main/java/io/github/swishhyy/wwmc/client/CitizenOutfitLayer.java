@@ -23,6 +23,7 @@ public final class CitizenOutfitLayer extends RenderLayer<CitizenRenderer.State,
     private static Outfit outfit(StructureRole role) {
         return switch(role) {
             case FARM -> new Outfit("farmer",0xFFF0CF58);
+            case GATHERER -> new Outfit("mason",0xFFAB9973);
             case LUMBER -> new Outfit("fletcher",0xFF467748);
             case MINE -> new Outfit("weaponsmith",0xFFE2B93F);
             case QUARRY -> new Outfit("armorer",0xFFE38033);

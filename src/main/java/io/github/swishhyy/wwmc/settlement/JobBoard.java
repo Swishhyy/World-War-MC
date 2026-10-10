@@ -111,7 +111,7 @@ public final class JobBoard {
      */
     public boolean prune(Settlement town,ToIntFunction<Station> places) {
         int before=assignments.size();
-        assignments.keySet().removeIf(citizen -> !town.citizens.contains(citizen));
+        assignments.keySet().removeIf(citizen -> !town.citizens.contains(citizen) || town.progress.children.contains(citizen));
         assignments.values().removeIf(home -> { Station station=town.station(home); return station==null || level(station.role())==OFF; });
         for(Station station:town.stations) {
             List<UUID> crew=crew(station.position());

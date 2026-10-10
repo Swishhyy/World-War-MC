@@ -7,7 +7,7 @@ public enum StructureRole {
     FARM("farm", false, true), LUMBER("lumber", false, true), MINE("mine", false, true), QUARRY("quarry", false, true), GUARD("guard", false, true),
     CRAFTSMAN("craftsman", false, true), SMELTERY("smeltery", false, true), COOK("cook", false, true), BLACKSMITH("blacksmith", false, true),
     COURIER("courier", false, true), ENCHANTER("enchanter", false, true), TRADER("trader", false, true), HUNTER("hunter", false, true), FISHERMAN("fisherman", false, true),
-    ANIMAL_KEEPER("animal_keeper", false, true), BUTCHER("butcher", false, true), RESEARCHER("researcher", false, true);
+    ANIMAL_KEEPER("animal_keeper", false, true), BUTCHER("butcher", false, true), RESEARCHER("researcher", false, true), GATHERER("gatherer",false,true);
     private final String id;
     private final boolean residential;
     private final boolean worker;

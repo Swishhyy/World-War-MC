@@ -4,6 +4,10 @@
     "wwmc:bronze_pickaxe",
     "wwmc:bronze_axe",
     "wwmc:bronze_shovel",
-    "wwmc:bronze_hoe"
+    "wwmc:bronze_hoe",
+    "wwmc:steel_pickaxe",
+    "wwmc:steel_axe",
+    "wwmc:steel_shovel",
+    "wwmc:steel_hoe"
   ]
 }

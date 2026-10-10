@@ -54,7 +54,7 @@ public final class SettlementService {
     private static final Map<ServerLevel,WorkforceBook<BlockPos>> WORKFORCE=new WeakHashMap<>();
     /** Cache locations briefly, never inventory contents or loaded chunk references. */
     private static final Map<ServerLevel,StationResourceCache> RESOURCE_SCANS=new WeakHashMap<>();
-    private static List<BlockPos> resourcePositions(ServerLevel level,Settlement town,Station station,String kind,Supplier<List<BlockPos>> scan) {
+    static List<BlockPos> resourcePositions(ServerLevel level,Settlement town,Station station,String kind,Supplier<List<BlockPos>> scan) {
         return RESOURCE_SCANS.computeIfAbsent(level,l -> new StationResourceCache()).positions(town,station,kind,level.getGameTime(),scan);
     }
     private static void refreshResources(ServerLevel level,Settlement town) {
@@ -624,6 +624,7 @@ public final class SettlementService {
         StationResourceCache scans=RESOURCE_SCANS.get(level);
         if(scans!=null) scans.prune(level.getGameTime());
         for(Settlement s:data.settlements) {
+            if(ForgeWorkshop.migrate(level,s)) data.setDirty();
             if(s.widenTo(Settlement.MIN_RADIUS,data.settlements)) {
                 // Old corner banners are no longer the border; they stay in the world as ordinary blocks.
                 s.borderBanners.clear(); data.setDirty();
@@ -635,6 +636,8 @@ public final class SettlementService {
             if(s.stations.removeIf(station -> level.hasChunkAt(station.position()) && !active(level,station))) data.setDirty();
             for(Station station:s.stations) if(synchronizeUpgrades(level,station)) data.setDirty();
             if(s.jobs.prune(s,station -> workerLimit(s,station))) data.setDirty();
+            CitizenWellbeing.tick(level,s);
+            PopulationGrowth.tick(level,s,level.getRandom());
         }
     }
     /** Quarry crews work on safety lines: a fall inside their town's pit does no damage. */

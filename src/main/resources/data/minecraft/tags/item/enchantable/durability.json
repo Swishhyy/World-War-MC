@@ -9,6 +9,15 @@
     "wwmc:bronze_helmet",
     "wwmc:bronze_chestplate",
     "wwmc:bronze_leggings",
-    "wwmc:bronze_boots"
+    "wwmc:bronze_boots",
+    "wwmc:steel_sword",
+    "wwmc:steel_pickaxe",
+    "wwmc:steel_axe",
+    "wwmc:steel_shovel",
+    "wwmc:steel_hoe",
+    "wwmc:steel_helmet",
+    "wwmc:steel_chestplate",
+    "wwmc:steel_leggings",
+    "wwmc:steel_boots"
   ]
 }

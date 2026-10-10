@@ -25,7 +25,7 @@ import net.minecraft.world.level.Level;
  * a recipe's container items (buckets, bottles) come back.
  */
 public final class Workshop {
-    public static final int MAX_ORDERS=27,MAX_TARGET=256,TRIP_BATCHES=8;
+    public static final int MAX_ORDERS=64,MAX_TARGET=256,TRIP_BATCHES=8;
     /** Keep {@code target} of {@code item} in town storage. A planks order accepts planks of any wood. */
     public record Order(String item,int target) {
         public static final Codec<Order> CODEC=RecordCodecBuilder.create(i -> i.group(
@@ -36,7 +36,8 @@ public final class Workshop {
         /** The ordered item; air when its mod is gone, which leaves the order idle instead of breaking the save. */
         public Item resolve() {
             Identifier id=Identifier.tryParse(item);
-            return id==null ? Items.AIR : BuiltInRegistries.ITEM.getValue(id);
+            Item resolved=id==null ? null : BuiltInRegistries.ITEM.getValue(id);
+            return resolved==null ? Items.AIR : resolved;
         }
         public boolean anyWood() { return resolve().getDefaultInstance().is(ItemTags.PLANKS); }
         public boolean product(ItemStack stack) { return !stack.isEmpty() && resolve()!=Items.AIR && (stack.is(resolve()) || anyWood() && stack.is(ItemTags.PLANKS)); }
@@ -219,6 +220,7 @@ public final class Workshop {
         if(example.isEmpty()) return "Place an item in the slot to teach its recipe";
         Order order=new Order(BuiltInRegistries.ITEM.getKey(example.getItem()).toString(),example.getMaxStackSize()==1 ? 1 : 16);
         String name=example.getHoverName().getString();
+        if(ForgeWorkshop.forged(example)) return "Order "+name+" from the blacksmith in Production / Forge";
         if(town.craftOrders.stream().anyMatch(o -> o.resolve()==example.getItem() || o.anyWood() && order.anyWood())) return "Craftsmen already make "+name;
         if(plans(recipes,order).isEmpty()) return "No crafting-table recipe makes "+name;
         if(town.craftOrders.size()>=MAX_ORDERS) return "The workshop knows "+MAX_ORDERS+" recipes; forget one first";

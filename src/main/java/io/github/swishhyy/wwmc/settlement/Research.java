@@ -1,6 +1,9 @@
 package io.github.swishhyy.wwmc.settlement;
 
 import java.util.List;
+import java.util.ArrayList;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 import io.github.swishhyy.wwmc.entity.CitizenEntity;
 import io.github.swishhyy.wwmc.WWMC;
 import io.github.swishhyy.wwmc.core.StructureRole;
@@ -15,6 +18,9 @@ import net.minecraft.world.item.Items;
  * also need a schematic recovered from a fortified bandit captain.
  */
 public final class Research {
+    public static final int SCROLL_TICKS=600;
+    public static final List<TownProjects.Cost> SCROLL_SUPPLIES=List.of(
+            cost("paper",2,Items.PAPER),new TownProjects.Cost("ink sac or charcoal",1,s -> s.is(Items.INK_SAC) || s.is(Items.CHARCOAL)));
     public enum WorkState { IDLE,WORKING,WAITING,PAUSED }
     /** A current observation, never saved and never used to advance or charge a project. */
     public record Status(WorkState state,String detail) {
@@ -28,20 +34,29 @@ public final class Research {
         public static Status working() { return new Status(WorkState.WORKING,"Researcher is working at the lectern."); }
     }
     public record Tech(String id,String title,String benefit,List<TownProjects.Cost> costs,String schematic,String prerequisite,int ticks) {
+        public Tech {
+            var requirements=new ArrayList<TownProjects.Cost>();
+            for(var cost:costs) if(!cost.name().equals("paper")) requirements.add(cost);
+            requirements.add(new TownProjects.Cost("research scrolls",Math.max(4,(ticks+SCROLL_TICKS-1)/SCROLL_TICKS),s -> s.is(WWMC.RESEARCH_SCROLL.get())));
+            costs=List.copyOf(requirements);
+        }
+        public int scrolls() { return Math.max(4,(ticks+SCROLL_TICKS-1)/SCROLL_TICKS); }
         public Tech(String id,String title,String benefit,List<TownProjects.Cost> costs,String schematic) {
             this(id,title,benefit,costs,schematic,"",3600);
         }
     }
     private static TownProjects.Cost cost(String name,int count,net.minecraft.world.item.Item item) { return new TownProjects.Cost(name,count,s -> s.is(item)); }
     public static final List<Tech> ALL=List.of(
-        new Tech("bronze_age","Bronze Age","Unlocks copper and bronze equipment, bronze alloying and quarry stations for settlement members",
+        new Tech("bronze_age","Bronze Age","Unlocks the alloy furnace, bronze forging, bronze anvil, blacksmith and quarry stations",
                 List.of(cost("copper ingots",24,Items.COPPER_INGOT),new TownProjects.Cost("tin ingots",8,s -> s.is(WWMC.TIN_INGOT.get())),
                         cost("coal",8,Items.COAL),cost("paper",8,Items.PAPER)),"","",3600),
-        new Tech("iron_age","Iron Age","Unlocks iron and gold equipment, buckets, shields, anvils and blacksmith stations",
+        new Tech("iron_age","Iron Age","Unlocks iron and gold forging, buckets, shields and durable iron anvils",
                 List.of(new TownProjects.Cost("bronze ingots",16,s -> s.is(WWMC.BRONZE_INGOT.get())),cost("iron ingots",16,Items.IRON_INGOT),
                         cost("coal",16,Items.COAL),cost("paper",16,Items.PAPER)),"","bronze_age",7200),
         new Tech("gemcraft","Gemcraft","Unlocks diamond equipment and enchanting after the Iron Age",
                 List.of(cost("diamonds",8,Items.DIAMOND),cost("lapis lazuli",24,Items.LAPIS_LAZULI),cost("paper",24,Items.PAPER)),"","iron_age",9600),
+        new Tech("steel_working","Steelworking","Alloy iron with coal or charcoal; blacksmiths forge durable steel tools and armor",
+                List.of(cost("iron ingots",24,Items.IRON_INGOT),cost("coal",16,Items.COAL)),"","iron_age",4800),
         new Tech("netherite_smithing","Netherite Smithing","Unlocks netherite equipment and upgrades after Gemcraft",
                 List.of(cost("netherite scraps",4,Items.NETHERITE_SCRAP),cost("gold ingots",16,Items.GOLD_INGOT),cost("paper",32,Items.PAPER)),"","gemcraft",12000),
         new Tech("housing_plans","Housing Plans","Raises the town's population limit by 10; housing beds are still required",
@@ -88,13 +103,16 @@ public final class Research {
     public static Tech project(Settlement town) { return byId(town.progress.project); }
     public static String progress(Settlement town) {
         Tech tech=project(town);
-        if(tech==null) return "Choose a project in Campaign / Research";
+        if(tech==null) return "Researchers make scrolls at lecterns; spend them in Research";
         int left=Math.max(0,tech.ticks()-town.progress.projectTicks);
         return tech.title()+": "+Math.min(100,town.progress.projectTicks*100/tech.ticks())+"%; "+(left+1199)/1200+" min of work left";
     }
     /** Read-only banner status. Loaded, available researchers take precedence over another worker's pause. */
     public static Status status(ServerLevel level,Settlement town) {
-        if(project(town)==null) return new Status(WorkState.IDLE,"Choose a project in Campaign / Research.");
+        if(project(town)==null && town.progress.scrollTarget==0 && !town.progress.scrollPaid)
+            return new Status(WorkState.IDLE,"Scroll production is paused. Set a target in Research.");
+        if(project(town)==null && !town.progress.scrollPaid && scrolls(level,town)>=town.progress.scrollTarget)
+            return new Status(WorkState.IDLE,"Scroll target reached: "+scrolls(level,town)+" in the warehouse.");
         if(town.jobs.level(StructureRole.RESEARCHER)==JobBoard.OFF)
             return Status.paused("Researcher jobs are off. Enable them on the Jobs tab.");
         List<Station> stations=town.stations.stream().filter(s -> s.role()==StructureRole.RESEARCHER).toList();
@@ -153,8 +171,10 @@ public final class Research {
         if(!tech.schematic().isEmpty() && !town.progress.schematics.contains(tech.schematic()))
             return "Needs the "+schematicTitle(tech.schematic()).toLowerCase(java.util.Locale.ROOT)+", carried by fortified bandit captains";
         if(!town.progress.project.isEmpty()) return "Finish "+(project(town)==null ? "the current project" : project(town).title())+" first";
-        if(town.stations.stream().noneMatch(s -> s.role()==StructureRole.RESEARCHER && SettlementService.active(level,s) && !desks(level,town,s).isEmpty()))
-            return "Add a Researcher Station with a lectern in range";
+        if(town.stations.stream().noneMatch(s -> s.role()==StructureRole.RESEARCHER && staffed(level,town,s) && !desks(level,town,s).isEmpty()))
+            return "Assign a researcher to a Researcher Station with a lectern";
+        String practical=practical(level,town,tech);
+        if(!practical.isEmpty()) return practical;
         for(TownProjects.Cost cost:tech.costs()) if(InventoryOps.count(SettlementService.storage(level,town),cost.material())<cost.count())
             return "Needs "+cost.count()+" "+cost.name()+" in the warehouse";
         return "";
@@ -166,26 +186,82 @@ public final class Research {
         String missing=missing(level,town,tech);
         if(!missing.isEmpty()) return missing;
         if(!TownProjects.pay(SettlementService.storage(level,town),tech.costs())) return "Materials changed; check warehouse stock.";
-        town.progress.project=id; town.progress.projectTicks=0;
+        town.progress.research.add(id);
         SettlementData.get(level).setDirty();
-        CampaignService.journal(level,town,"Started "+tech.title()+". Supplies paid; a researcher must work at a lectern to finish it.");
-        WWMC.LOGGER.info("[WWMC][research-start] town={} project={} workTicks={}",town.id,id,tech.ticks());
-        return tech.title()+" started. Assign a researcher; progress pauses when they cannot work.";
+        CampaignService.record(level,town,"Researched "+tech.title()+": "+tech.benefit()+".");
+        WWMC.LOGGER.info("[WWMC][research-unlock] town={} project={} scrolls={} age={}",town.id,id,tech.scrolls(),age(town));
+        return tech.title()+" researched. Settlement members share this discovery.";
     }
-    /** A single town receives at most ten ticks of work each game tick, even with several researchers. */
+    /** Furnished and staffed stations are practical requirements, rather than another stack of items. */
+    private static boolean staffed(ServerLevel level,Settlement town,Station station) {
+        return town.jobs.level(station.role())!=JobBoard.OFF && SettlementService.active(level,station)
+                && town.jobs.crew(station.position()).stream().anyMatch(id -> town.citizens.contains(id)
+                    && town.jobs.holdsPlace(id,station,SettlementService.workerLimit(town,station))
+                    && level.getEntity(id) instanceof CitizenEntity citizen && citizen.isAlive() && !citizen.isBaby() && citizen.town(level)==town);
+    }
+    public static String practical(ServerLevel level,Settlement town,Tech tech) {
+        if(tech.id().equals("bronze_age") && town.citizens.size()<3) return "Grow to 3 citizens before the Bronze Age";
+        if(tech.id().equals("iron_age") && town.stations.stream().noneMatch(s -> s.role()==StructureRole.BLACKSMITH && staffed(level,town,s)
+                && !SettlementService.anvils(level,town,s).isEmpty() && !ForgeWorkshop.heat(level,town,s).isEmpty()))
+            return "Staff a blacksmith with an anvil and a furnace before the Iron Age";
+        if(tech.id().equals("steel_working") && town.stations.stream().noneMatch(s -> s.role()==StructureRole.SMELTERY && staffed(level,town,s)
+                && SettlementService.processingDevices(level,town,s).stream().anyMatch(p -> level.getBlockState(p).is(WWMC.ALLOY_FURNACE.get()))))
+            return "Staff a smeltery with an alloy furnace before Steelworking";
+        if(tech.id().equals("field_medicine") && town.stations.stream().noneMatch(s -> s.role()==StructureRole.HOSPITAL && staffed(level,town,s)
+                && !SettlementService.beds(level,town,s).isEmpty())) return "Staff a hospital with a bed first";
+        return "";
+    }
+    public static int scrolls(ServerLevel level,Settlement town) {
+        return InventoryOps.count(SettlementService.storage(level,town),s -> s.is(WWMC.RESEARCH_SCROLL.get()));
+    }
+    /** Paid scrolls may finish even after a target is lowered; they are never discarded. */
+    public static String scrollPause(ServerLevel level,Settlement town) {
+        if(project(town)!=null) return "";
+        var stock=SettlementService.storage(level,town);
+        if(stock.isEmpty()) return "Needs a loaded warehouse with storage for paper, ink and scrolls.";
+        if(town.progress.scrollPaid) return room(stock,new ItemStack(WWMC.RESEARCH_SCROLL.get())) ? "" : "Warehouse is full. Keeping the paid scroll until there is room.";
+        if(scrolls(level,town)>=town.progress.scrollTarget) return town.progress.scrollTarget==0 ? "Scroll production is paused." : "Scroll target reached: "+town.progress.scrollTarget+" in the warehouse.";
+        for(var cost:SCROLL_SUPPLIES) if(InventoryOps.count(stock,cost.material())<cost.count()) return "Needs "+cost.count()+" "+cost.name()+" in the warehouse to make a scroll.";
+        return "";
+    }
+    private static boolean room(List<Container> stock,ItemStack item) {
+        for(var box:stock) for(int slot=0;slot<box.getContainerSize();slot++) {
+            ItemStack present=box.getItem(slot);
+            if(box.canPlaceItem(slot,item) && (present.isEmpty() || ItemStack.isSameItemSameComponents(present,item)
+                    && present.getCount()<Math.min(present.getMaxStackSize(),box.getMaxStackSize()))) return true;
+        }
+        return false;
+    }
+    /** Only actual lectern work advances paid projects or creates scrolls. Each town gets one work step per tick. */
     public static boolean work(ServerLevel level,Settlement town,Station station,BlockPos desk) {
-        Tech tech=project(town);
-        if(tech==null || has(town,tech.id()) || station.role()!=StructureRole.RESEARCHER || town.station(station.position())!=station
+        if(station.role()!=StructureRole.RESEARCHER || town.station(station.position())!=station
                 || town.jobs.level(StructureRole.RESEARCHER)==JobBoard.OFF || !SettlementService.active(level,station)
                 || !desks(level,town,station).contains(desk) || town.progress.lastResearchWork==level.getGameTime()) return false;
+        Tech tech=project(town);
+        if(tech==null && !scrollPause(level,town).isEmpty()) return false;
         town.progress.lastResearchWork=level.getGameTime();
-        town.progress.projectTicks=Math.min(tech.ticks(),town.progress.projectTicks+10);
-        SettlementData.get(level).setDirty();
-        if(town.progress.projectTicks>=tech.ticks()) {
-            town.progress.research.add(tech.id()); town.progress.project=""; town.progress.projectTicks=0;
-            CampaignService.record(level,town,"Researched "+tech.title()+": "+tech.benefit()+".");
-            WWMC.LOGGER.info("[WWMC][research-complete] town={} project={} age={}",town.id,tech.id(),age(town));
+        if(tech!=null) {
+            // Earlier versions paid materials up front. Finish those projects without charging scrolls or supplies again.
+            town.progress.projectTicks=Math.min(tech.ticks(),town.progress.projectTicks+10);
+            if(town.progress.projectTicks>=tech.ticks()) {
+                town.progress.research.add(tech.id()); town.progress.project=""; town.progress.projectTicks=0;
+                CampaignService.record(level,town,"Researched "+tech.title()+": "+tech.benefit()+".");
+                WWMC.LOGGER.info("[WWMC][research-complete] town={} project={} age={}",town.id,tech.id(),age(town));
+            }
+        } else {
+            var stock=SettlementService.storage(level,town);
+            if(!town.progress.scrollPaid) {
+                if(!TownProjects.pay(stock,SCROLL_SUPPLIES)) return false;
+                town.progress.scrollPaid=true; town.progress.scrollTicks=0;
+            }
+            town.progress.scrollTicks=Math.min(SCROLL_TICKS,town.progress.scrollTicks+10);
+            if(town.progress.scrollTicks>=SCROLL_TICKS) {
+                ItemStack made=new ItemStack(WWMC.RESEARCH_SCROLL.get());
+                for(var box:stock) made=InventoryOps.insert(box,made);
+                if(made.isEmpty()) { town.progress.scrollPaid=false; town.progress.scrollTicks=0; }
+            }
         }
+        SettlementData.get(level).setDirty();
         return true;
     }
 }

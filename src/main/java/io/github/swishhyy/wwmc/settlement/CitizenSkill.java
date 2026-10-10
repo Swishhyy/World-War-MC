@@ -28,7 +28,7 @@ public final class CitizenSkill {
     private static boolean processes(StructureRole role) { return role==StructureRole.COOK || role==StructureRole.SMELTERY; }
     /** Jobs whose tools wear out with every block, catch or cut. */
     public static boolean wearsTools(StructureRole role) {
-        return role.excavates() || role==StructureRole.LUMBER || role==StructureRole.HUNTER || role==StructureRole.FISHERMAN || role==StructureRole.BUTCHER;
+        return role.excavates() || role==StructureRole.FARM || role==StructureRole.GATHERER || role==StructureRole.LUMBER || role==StructureRole.HUNTER || role==StructureRole.FISHERMAN || role==StructureRole.BUTCHER;
     }
     /** Extra work speed, in percent. */
     public static int speed(StructureRole role,int level) {

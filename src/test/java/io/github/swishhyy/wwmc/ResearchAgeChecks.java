@@ -33,4 +33,15 @@ public final class ResearchAgeChecks {
         town.campaign.members.remove(member); assertFalse(AgeProgression.member(town,member));
         town.trading.npc=true; assertFalse(AgeProgression.member(town,town.owner));
     }
+    @Test void childhoodAndLoadedBirthCooldownSurviveOldAndNewSaves() {
+        Settlement town=town(); UUID child=UUID.randomUUID(); town.citizens.add(child);
+        town.progress.children.add(child); town.progress.birthWaitTicks=430; town.progress.growthEnabled=false;
+        var json=Settlement.CODEC.encodeStart(JsonOps.INSTANCE,town).getOrThrow();
+        Settlement loaded=Settlement.CODEC.parse(JsonOps.INSTANCE,json).getOrThrow();
+        assertEquals(Set.of(child),loaded.progress.children); assertEquals(430,loaded.progress.birthWaitTicks); assertFalse(loaded.progress.growthEnabled);
+        var old=json.deepCopy().getAsJsonObject(); var progress=old.getAsJsonObject("progress");
+        progress.remove("children"); progress.remove("birth_wait_ticks"); progress.remove("growth_enabled");
+        Settlement legacy=Settlement.CODEC.parse(JsonOps.INSTANCE,old).getOrThrow();
+        assertTrue(legacy.progress.children.isEmpty()); assertTrue(legacy.progress.growthEnabled); assertEquals(1200,legacy.progress.birthWaitTicks);
+    }
 }

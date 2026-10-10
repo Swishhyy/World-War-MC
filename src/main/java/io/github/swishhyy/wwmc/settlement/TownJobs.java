@@ -9,6 +9,7 @@ public record TownJobs(int assigned,int unassigned,int squadOnly,int places,int 
     public static TownJobs assess(ServerLevel level,Settlement town) {
         int assigned=0,unassigned=0,squadOnly=0,places=0,open=0,off=0,waiting=0;
         for(UUID id:town.citizens) {
+            if(town.progress.children.contains(id)) continue;
             var home=town.jobs.home(id);
             Station station=home==null ? null : town.station(home);
             if(station!=null && town.jobs.level(station.role())!=JobBoard.OFF && town.jobs.holdsPlace(id,station,SettlementService.workerLimit(town,station))) assigned++;
@@ -19,7 +20,7 @@ public record TownJobs(int assigned,int unassigned,int squadOnly,int places,int 
             int capacity=SettlementService.workerLimit(town,station);
             if(town.jobs.level(station.role())==JobBoard.OFF) { off+=capacity; continue; }
             places+=capacity;
-            int filled=(int)town.jobs.crew(station.position()).stream().filter(id -> town.citizens.contains(id)
+            int filled=(int)town.jobs.crew(station.position()).stream().filter(id -> town.citizens.contains(id) && !town.progress.children.contains(id)
                     && town.jobs.holdsPlace(id,station,capacity)).count();
             int free=capacity-filled;
             boolean available=SettlementService.active(level,station) && (station.role()!=StructureRole.TRADER

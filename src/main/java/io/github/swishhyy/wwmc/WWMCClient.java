@@ -65,6 +65,7 @@ public final class WWMCClient {
         event.registerLayerDefinition(io.github.swishhyy.wwmc.client.CitizenOutfitLayer.LAYER,io.github.swishhyy.wwmc.client.CitizenOutfitLayer::createBodyLayer);
     }
     private static void screens(RegisterMenuScreensEvent event) {
+        event.register(WwmcMenus.ALLOY_FURNACE.get(),io.github.swishhyy.wwmc.client.screen.AlloyFurnaceScreen::new);
         event.register(WwmcMenus.PANEL.get(),PanelScreen::new);
         event.register(WwmcMenus.CRAFTSMAN.get(),CraftsmanScreen::new);
         event.register(WwmcMenus.CITIZEN.get(),CitizenScreen::new);

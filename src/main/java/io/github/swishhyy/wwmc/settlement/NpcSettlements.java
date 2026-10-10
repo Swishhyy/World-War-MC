@@ -42,14 +42,7 @@ public final class NpcSettlements {
                 if(discover(level,candidate)) return;
             }
         }
-        // New recruits are paid for with food that workers actually gathered; growth also observes housing and population caps.
-        if(level.getGameTime()%6000==0) for(Settlement town:data.settlements) if(town.trading.npc && town.trading.buildIndex<0 && loaded(level,town.center)
-                && town.citizens.size()<Math.min(10,SettlementService.populationLimit(town))) {
-            var stock=SettlementService.storage(level,town);
-            if(InventoryOps.count(stock,FoodHealing::food)>=40 && SettlementService.recruit(level,town,1)>0)
-                { for(int n=0;n<8;n++) InventoryOps.takeOne(stock,FoodHealing::food);
-                  CampaignService.journal(level,town,"A new citizen joined after our workers gathered enough food."); }
-        }
+        // Founding still recruits a starting crew. Later growth uses PopulationGrowth's happy parents and real babies.
     }
     public static boolean loaded(ServerLevel level,BlockPos center) {
         for(long chunk:TradeChunks.window(center)) { var p=new net.minecraft.world.level.ChunkPos((int)chunk,(int)(chunk >> 32)); if(!level.hasChunk(p.x(),p.z())) return false; }

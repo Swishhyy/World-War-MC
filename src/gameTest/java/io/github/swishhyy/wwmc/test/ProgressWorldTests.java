@@ -91,7 +91,7 @@ public final class ProgressWorldTests {
                 helper.assertTrue(town.stations.size()==28 && jobs.assigned()==24 && jobs.places()==24 && jobs.unassigned()==6 && jobs.open()==0,
                         "Support stations must not inflate employment: "+jobs);
                 var view=Panels.town(level,town);
-                helper.assertTrue(view.subtitle().getString().startsWith("30 citizens · 24/24 jobs · "),"Header hides job capacity: "+view.subtitle());
+                helper.assertTrue(view.tabs().getFirst().rows().stream().anyMatch(r -> r.text().getString().equals("Jobs") && r.detail().getString().contains("24/24")),"Overview hides job capacity");
                 var unemployment=TownNeeds.assess(level,town).stream().filter(need -> need.title().equals("6 citizens have no job")).findFirst().orElseThrow();
                 helper.assertTrue(unemployment.detail().startsWith("24/24 enabled job places filled.") && !unemployment.detail().contains("priority"),
                         "Full crews must not recommend raising priority: "+unemployment.detail());
@@ -138,6 +138,10 @@ public final class ProgressWorldTests {
             level.setBlockAndUpdate(chestPos,Blocks.CHEST.defaultBlockState());
             Container chest=(Container)level.getBlockEntity(chestPos);
             chest.setItem(0,new ItemStack(Items.IRON_INGOT,40)); chest.setItem(1,new ItemStack(Items.COAL,16)); chest.setItem(2,new ItemStack(Items.GOLD_INGOT,8));
+            chest.setItem(3,new ItemStack(WWMC.RESEARCH_SCROLL.get(),Research.byId("steel_tools").scrolls()));
+            var scholar=new CitizenEntity(WWMC.CITIZEN.get(),level); scholar.join(town.id); scholar.setNoAi(true);
+            scholar.setPos(desk.getX()+1.5,desk.getY(),desk.getZ()+.5); town.citizens.add(scholar.getUUID());
+            town.jobs.assign(scholar.getUUID(),research.position()); level.addFreshEntity(scholar);
             helper.succeedWhen(() -> {
                 var needs=TownNeeds.assess(level,town);
                 var titles=needs.stream().map(TownNeeds.Need::title).toList();
@@ -147,16 +151,14 @@ public final class ProgressWorldTests {
                         "The kitchen's missing barrel and oven are named: "+titles);
                 helper.assertTrue(needs.getFirst().severity()>=needs.getLast().severity(),"Needs are listed most urgent first");
                 String result=Research.study(level,town,"steel_tools");
-                helper.assertTrue(town.progress.project.equals("steel_tools") && !Research.has(town,"steel_tools"),"Research must be paid before timed work, not instantly unlocked: "+result);
-                town.progress.projectTicks=Research.byId("steel_tools").ticks()-10;
-                Research.work(level,town,research,desk);
+                helper.assertTrue(town.progress.project.isEmpty() && Research.has(town,"steel_tools"),"Earned scrolls did not unlock research: "+result);
                 helper.assertTrue(Research.has(town,"steel_tools"),"Steel Tools could not be researched: "+result);
                 var stock=SettlementService.storage(level,town);
                 helper.assertTrue(InventoryOps.count(stock,s -> s.is(Items.IRON_INGOT))==8 && InventoryOps.count(stock,s -> s.is(Items.COAL))==0
                         && InventoryOps.count(stock,s -> s.is(Items.GOLD_INGOT))==0,"Steel Tools spends exactly 32 iron, 16 coal and 8 gold");
                 helper.assertTrue(Research.study(level,town,"steel_tools").startsWith("Already"),"Research is paid for once");
                 helper.assertTrue(Research.study(level,town,"reinforced_armor").contains("schematic"),"Advanced research needs a captain's schematic");
-                data.settlements.remove(town); data.setDirty();
+                scholar.discard(); data.settlements.remove(town); data.setDirty();
                 CitizenNavigationTests.release(level,start,chunks);
             });
         });

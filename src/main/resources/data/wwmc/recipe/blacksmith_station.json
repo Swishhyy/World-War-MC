@@ -8,7 +8,7 @@
   ],
   "key": {
     "P": "#minecraft:planks",
-    "I": "minecraft:iron_ingot"
+    "I": "minecraft:copper_ingot"
   },
   "result": {
     "id": "wwmc:blacksmith_station",

@@ -4,9 +4,24 @@
 
 ## Unreleased
 
+- Add saved citizen happiness from actual meals, housing, safety and distinct housing amenities. Rotate available meals for variety; keep bowl and bottle returns.
+- Add food-funded births from happy adults with spare housing, population room and parent cooldowns. Babies play near home, shelter and rest, and take no jobs until native adulthood. Pause growth in People → Wellbeing; no chat spam or unloaded catch-up births.
+- Improve farmer, lumberjack and gatherer speed with better native tools, including bronze and steel. Keep mining's existing pickaxe timing; farmers can work without a hoe and use available hoes for a bonus.
+- Add a smelter-operated Alloy Furnace with two material inputs, separate fuel, saved progress, hopper support and clear pause reasons. Make bronze directly from copper + tin; keep old blends smeltable.
+- Add Steelworking after Iron Age, steel ingots, tools and armor, using native iron model and texture recolors. Smelters alloy iron + coal/charcoal; blacksmiths forge and repair the equipment.
+- Share small fuel deliveries across production stations. Ordinary smelters return finished iron; blacksmiths release surplus ingredients when their finished orders are stocked locally.
+- Simplify the banner to an overview and four main destinations: People, Production, Research and Neighbours.
+- Add stock orders for automatic job block production and blacksmith forging, without requiring example items.
+- Require blacksmith forging for bronze, copper and later equipment. Keep wood and stone player-crafted; protect ingredients when blocked, including vanilla redstone crafters.
+- Add blacksmith equipment forging and a bronze anvil that works 65% slower than iron, with normal anvil wear. Repairs take priority and preserve the original gear.
+- Replace new research timers with tradeable researcher-made scrolls, paid discoveries, and practical settlement requirements. Preserve existing unlocks and already-paid projects.
+- Add Gatherers for cane, bamboo, sand, gravel and clay. Preserve plant bases and protected construction.
+- Let smelters make charcoal, glass, bricks and terracotta. Let couriers collect surplus fuel and alloys while retaining production reserves.
+- Add ruined town halls containing salvageable settlement blocks, a bronze smithy and finite scroll loot.
+
 - Add a Neighbours banner board with nearby-town needs, trade status, NPC requests, alliances and quiet news. Keep other player towns' journals private.
 - Let existing traders fulfil accepted player-settlement contracts with physical warehouse deliveries, home stock reserves, incoming demand reservations and saved emerald payments. Manual delivery remains available.
-- Let loaded NPC settlements arrange up to two neighbour trade routes and exchange real surplus. Leave their primary checkpoint available for player trade; record deliveries and food-funded growth at the banner.
+- Let loaded NPC settlements arrange up to two neighbour trade routes and exchange real surplus. Leave their primary checkpoint available for player trade; record deliveries and happiness-based births at the banner.
 - Give player-connected routes priority over autonomous NPC caravans within the existing server trader limit.
 - Remove the duel feature. Refund previously reserved preview stakes when loading existing saves.
 - Add owner-approved battles for expedition resource outposts: hold the flag to capture its existing miners, storage and supply route. Both owners must stay online.
@@ -14,8 +29,8 @@
 - Use native melee range so guards keep approaching instead of stopping at their longer block-work reach and swinging too far away.
 - Apply normal shield durability wear to a guard's actual blocked damage; frontal blocks protect health while rear hits still land.
 - Log caravan handoffs, contract payments, outpost ownership changes and interrupted-battle recovery without recurring chat announcements.
-- Make tin and bronze recipes discoverable in the vanilla recipe book, and show the bronze crafting grid and smelting step in the Settlement Guide. Keep Bronze Age research requirements.
-- Explain raw tin, tin ingots and Bronze Blend in item tooltips; verify that every alloy ingredient appears in the mod's creative tab.
+- Make tin, alloy-furnace and equipment recipes discoverable in the vanilla recipe book, and show actual alloy recipes in the Settlement Guide. Keep research requirements.
+- Explain raw tin, tin ingots, alloy ingredients and legacy Bronze Blend in item tooltips; keep old blends usable while directing new production through the alloy furnace.
 - Recolor the vanilla gunpowder sprite for Bronze Blend: copper powder with four pale blue tin flecks, preserving its exact shape and transparency.
 - Replace cod and salmon carcass shapes with whole fish: intact heads, visible eyes, fins and forked tails, with a sideways dropped-item pose.
 - Fix lumberjack planting through grass and flowers and beneath natural forest canopies. Let nearby natural leaves from other tree species be cleared when they obstruct a trunk.

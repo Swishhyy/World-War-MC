@@ -52,11 +52,22 @@ public final class WWMC {
     public static final DeferredRegister.Blocks BLOCKS=DeferredRegister.createBlocks(MODID);
     public static final DeferredRegister.Items ITEMS=DeferredRegister.createItems(MODID);
     public static final DeferredRegister.Entities ENTITIES=DeferredRegister.createEntities(MODID);
+    public static final DeferredRegister<net.minecraft.world.level.block.entity.BlockEntityType<?>> BLOCK_ENTITIES=DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE,MODID);
     public static final DeferredRegister<CreativeModeTab> TABS=DeferredRegister.create(Registries.CREATIVE_MODE_TAB,MODID);
     // Both models are detailed rather than full cubes, so they must not hide their neighbours' faces.
     public static final DeferredBlock<SettlementBannerBlock> BANNER=BLOCKS.registerBlock("settlement_banner",SettlementBannerBlock::new,
             p -> p.mapColor(MapColor.COLOR_BLUE).strength(2,3_600_000).pushReaction(PushReaction.BLOCK).noOcclusion());
     public static final DeferredItem<BlockItem> BANNER_ITEM=ITEMS.registerSimpleBlockItem(BANNER);
+    public static final DeferredBlock<io.github.swishhyy.wwmc.block.BronzeAnvilBlock> BRONZE_ANVIL=BLOCKS.registerBlock("bronze_anvil",
+            io.github.swishhyy.wwmc.block.BronzeAnvilBlock::new,p -> p.mapColor(MapColor.COLOR_ORANGE).strength(3,6).noOcclusion().requiresCorrectToolForDrops());
+    public static final DeferredItem<BlockItem> BRONZE_ANVIL_ITEM=ITEMS.registerSimpleBlockItem(BRONZE_ANVIL);
+    public static final DeferredBlock<io.github.swishhyy.wwmc.block.AlloyFurnaceBlock> ALLOY_FURNACE=BLOCKS.registerBlock("alloy_furnace",
+            io.github.swishhyy.wwmc.block.AlloyFurnaceBlock::new,p -> p.mapColor(MapColor.STONE).strength(3.5F).requiresCorrectToolForDrops()
+                    .lightLevel(s -> s.getValue(net.minecraft.world.level.block.AbstractFurnaceBlock.LIT) ? 13 : 0));
+    public static final DeferredItem<BlockItem> ALLOY_FURNACE_ITEM=ITEMS.registerSimpleBlockItem(ALLOY_FURNACE);
+    public static final DeferredHolder<net.minecraft.world.level.block.entity.BlockEntityType<?>,net.minecraft.world.level.block.entity.BlockEntityType<io.github.swishhyy.wwmc.block.AlloyFurnaceEntity>> ALLOY_FURNACE_ENTITY=
+            BLOCK_ENTITIES.register("alloy_furnace",() -> new net.minecraft.world.level.block.entity.BlockEntityType<>(io.github.swishhyy.wwmc.block.AlloyFurnaceEntity::new,java.util.Set.of(ALLOY_FURNACE.get())));
+    public static final DeferredItem<Item> RESEARCH_SCROLL=material("research_scroll","tooltip.wwmc.research_scroll");
     public static final DeferredBlock<Block> TIN_ORE=BLOCKS.registerBlock("tin_ore",Block::new,p -> p.mapColor(MapColor.STONE).strength(3,3).requiresCorrectToolForDrops());
     public static final DeferredBlock<Block> DEEPSLATE_TIN_ORE=BLOCKS.registerBlock("deepslate_tin_ore",Block::new,p -> p.mapColor(MapColor.DEEPSLATE).strength(4.5F,3).requiresCorrectToolForDrops());
     public static final DeferredBlock<Block> TIN_BLOCK=BLOCKS.registerBlock("tin_block",Block::new,p -> p.mapColor(MapColor.METAL).strength(3,6).requiresCorrectToolForDrops());
@@ -83,6 +94,16 @@ public final class WWMC {
     public static final DeferredItem<Item> BRONZE_CHESTPLATE=ITEMS.registerItem("bronze_chestplate",Item::new,p -> p.humanoidArmor(BronzeEquipment.ARMOR,ArmorType.CHESTPLATE));
     public static final DeferredItem<Item> BRONZE_LEGGINGS=ITEMS.registerItem("bronze_leggings",Item::new,p -> p.humanoidArmor(BronzeEquipment.ARMOR,ArmorType.LEGGINGS));
     public static final DeferredItem<Item> BRONZE_BOOTS=ITEMS.registerItem("bronze_boots",Item::new,p -> p.humanoidArmor(BronzeEquipment.ARMOR,ArmorType.BOOTS));
+    public static final DeferredItem<Item> STEEL_INGOT=ITEMS.registerSimpleItem("steel_ingot");
+    public static final DeferredItem<Item> STEEL_SWORD=ITEMS.registerItem("steel_sword",Item::new,p -> p.sword(io.github.swishhyy.wwmc.core.SteelEquipment.TOOLS,3,-2.4F));
+    public static final DeferredItem<Item> STEEL_PICKAXE=ITEMS.registerItem("steel_pickaxe",Item::new,p -> p.pickaxe(io.github.swishhyy.wwmc.core.SteelEquipment.TOOLS,1,-2.8F));
+    public static final DeferredItem<Item> STEEL_AXE=ITEMS.registerItem("steel_axe",Item::new,p -> p.axe(io.github.swishhyy.wwmc.core.SteelEquipment.TOOLS,6,-3.1F));
+    public static final DeferredItem<Item> STEEL_SHOVEL=ITEMS.registerItem("steel_shovel",Item::new,p -> p.shovel(io.github.swishhyy.wwmc.core.SteelEquipment.TOOLS,1.5F,-3));
+    public static final DeferredItem<Item> STEEL_HOE=ITEMS.registerItem("steel_hoe",Item::new,p -> p.hoe(io.github.swishhyy.wwmc.core.SteelEquipment.TOOLS,-2.5F,-1));
+    public static final DeferredItem<Item> STEEL_HELMET=ITEMS.registerItem("steel_helmet",Item::new,p -> p.humanoidArmor(io.github.swishhyy.wwmc.core.SteelEquipment.ARMOR,ArmorType.HELMET));
+    public static final DeferredItem<Item> STEEL_CHESTPLATE=ITEMS.registerItem("steel_chestplate",Item::new,p -> p.humanoidArmor(io.github.swishhyy.wwmc.core.SteelEquipment.ARMOR,ArmorType.CHESTPLATE));
+    public static final DeferredItem<Item> STEEL_LEGGINGS=ITEMS.registerItem("steel_leggings",Item::new,p -> p.humanoidArmor(io.github.swishhyy.wwmc.core.SteelEquipment.ARMOR,ArmorType.LEGGINGS));
+    public static final DeferredItem<Item> STEEL_BOOTS=ITEMS.registerItem("steel_boots",Item::new,p -> p.humanoidArmor(io.github.swishhyy.wwmc.core.SteelEquipment.ARMOR,ArmorType.BOOTS));
     public static final Map<StructureRole,DeferredBlock<StationBlock>> STATIONS=new EnumMap<>(StructureRole.class);
     public static final Map<StructureRole,DeferredItem<BlockItem>> STATION_ITEMS=new EnumMap<>(StructureRole.class);
     static {
@@ -109,16 +130,17 @@ public final class WWMC {
     public static final DeferredHolder<CreativeModeTab,CreativeModeTab> TAB=TABS.register("settlement",() -> CreativeModeTab.builder()
         .title(Component.translatable("itemGroup.wwmc")).withTabsBefore(CreativeModeTabs.COMBAT)
         .icon(() -> BANNER_ITEM.get().getDefaultInstance()).displayItems((p,out) -> {
-            out.accept(BANNER_ITEM.get()); out.accept(SURVEYOR.get()); out.accept(GUIDE.get());
+            out.accept(BANNER_ITEM.get()); out.accept(SURVEYOR.get()); out.accept(GUIDE.get()); out.accept(BRONZE_ANVIL_ITEM.get()); out.accept(RESEARCH_SCROLL.get()); out.accept(ALLOY_FURNACE_ITEM.get());
             for(var item:java.util.List.of(TIN_ORE_ITEM,DEEPSLATE_TIN_ORE_ITEM,TIN_BLOCK_ITEM,RAW_TIN_BLOCK_ITEM,BRONZE_BLOCK_ITEM,
-                    RAW_TIN,TIN_INGOT,BRONZE_BLEND,BRONZE_INGOT,BRONZE_SWORD,BRONZE_PICKAXE,BRONZE_AXE,BRONZE_SHOVEL,BRONZE_HOE,
-                    BRONZE_HELMET,BRONZE_CHESTPLATE,BRONZE_LEGGINGS,BRONZE_BOOTS)) out.accept(item.get());
+                    RAW_TIN,TIN_INGOT,BRONZE_INGOT,BRONZE_SWORD,BRONZE_PICKAXE,BRONZE_AXE,BRONZE_SHOVEL,BRONZE_HOE,
+                    BRONZE_HELMET,BRONZE_CHESTPLATE,BRONZE_LEGGINGS,BRONZE_BOOTS,STEEL_INGOT,STEEL_SWORD,STEEL_PICKAXE,STEEL_AXE,STEEL_SHOVEL,STEEL_HOE,
+                    STEEL_HELMET,STEEL_CHESTPLATE,STEEL_LEGGINGS,STEEL_BOOTS)) out.accept(item.get());
             for(StructureRole role:StructureRole.values()) out.accept(STATION_ITEMS.get(role).get());
             for(TrapKind kind:TrapKind.values()) out.accept(TRAP_ITEMS.get(kind).get());
             for(var kind:Carcasses.Kind.values()) out.accept(CARCASSES.get(kind).get());
         }).build());
     public WWMC(IEventBus bus, ModContainer container) {
-        BLOCKS.register(bus); ITEMS.register(bus); ENTITIES.register(bus); TABS.register(bus);
+        BLOCKS.register(bus); ITEMS.register(bus); ENTITIES.register(bus); TABS.register(bus); BLOCK_ENTITIES.register(bus);
         WwmcMenus.MENUS.register(bus);
         bus.addListener(this::attributes);
         bus.addListener(WwmcNetwork::register);

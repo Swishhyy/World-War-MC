@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "wwmc:bronze_shovel"
+    "wwmc:bronze_shovel",
+    "wwmc:steel_shovel"
   ]
 }

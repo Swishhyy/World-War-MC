@@ -96,7 +96,7 @@ public final class ExpeditionService {
     }
     private static void build(ServerLevel level,ExpeditionData.Site site) {
         BlockPos c=site.pos;
-        if(site.kind.equals("fort") || site.kind.equals("mine")) {
+        if(site.kind.equals("fort") || site.kind.equals("mine") || site.kind.equals("townhall")) {
             RuinedSites.build(level,site);
             cache(level,site); return;
         }
@@ -126,6 +126,11 @@ public final class ExpeditionService {
         cache.setItem(3,new ItemStack(Items.STONE_PICKAXE)); cache.setItem(4,new ItemStack(Items.PAPER,16)); cache.setChanged();
         cache.setItem(6,new ItemStack(WWMC.GUIDE.get())); cache.setItem(7,new ItemStack(WWMC.TIN_INGOT.get(),8));
         cache.setChanged();
+        if(site.kind.equals("townhall")) {
+            cache.setItem(0,new ItemStack(Items.COPPER_INGOT,12)); cache.setItem(2,new ItemStack(Items.CHARCOAL,4));
+            cache.setItem(3,new ItemStack(Items.STONE_SHOVEL)); cache.setItem(4,new ItemStack(Items.PAPER,24));
+            cache.setItem(5,new ItemStack(WWMC.RESEARCH_SCROLL.get(),2)); cache.setChanged();
+        }
         if(site.kind.equals("mine")) for(int y=0;y<2;y++) level.setBlock(c.offset(-4,y,-1),ore(site).defaultBlockState(),3);
         if(ExpeditionData.Site.RESCUE.equals(site.objective)) {
             // A fenced pen in the south-east corner, clear of the outpost's station spots.
@@ -393,7 +398,7 @@ public final class ExpeditionService {
             int rx=Math.floorDiv(player.blockPosition().getX(),768),rz=Math.floorDiv(player.blockPosition().getZ(),768);
             Random random=new Random(level.getSeed()^((long)rx<<32)^rz);
             BlockPos probe=new BlockPos(rx*768+128+random.nextInt(512),0,rz*768+128+random.nextInt(512));
-            discover(level,probe,List.of("camp","mine","fort").get(random.nextInt(3)),rx+":"+rz);
+            discover(level,probe,List.of("camp","mine","fort","townhall").get(random.nextInt(4)),rx+":"+rz);
         }
         if(level.getGameTime()%200==0) raids(level);
         // A defended raid leaves nothing to claim; its record goes once the defenders are thanked.

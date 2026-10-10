@@ -65,7 +65,7 @@ public final class LogisticsChecks {
         check(Workshop.learn(level,shop,new ItemStack(Items.DIAMOND_ORE)).startsWith("No crafting"),"Items without a crafting recipe cannot be taught");
         check(Workshop.learn(level,shop,new ItemStack(Items.SPRUCE_PLANKS)).contains("any wood"),"A planks order accepts any wood");
         check(Workshop.learn(level,shop,new ItemStack(Items.OAK_PLANKS)).startsWith("Craftsmen already"),"One planks order covers every wood");
-        check(Workshop.learn(level,shop,new ItemStack(Items.IRON_PICKAXE)).startsWith("Learned") && shop.craftOrders.getLast().target()==1,"Tools start with a target of one");
+        check(Workshop.learn(level,shop,new ItemStack(Items.STONE_SHOVEL)).startsWith("Learned") && shop.craftOrders.getLast().target()==1,"Tools start with a target of one");
 
         List<Workshop.Order> planks=List.of(new Workshop.Order("minecraft:oak_planks",8));
         SimpleContainer logs=box(new ItemStack(Items.BIRCH_LOG,5)),bag=new SimpleContainer(36);

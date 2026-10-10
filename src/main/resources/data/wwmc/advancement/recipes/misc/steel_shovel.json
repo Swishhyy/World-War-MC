@@ -7,8 +7,7 @@
         "items": [
           {
             "items": [
-              "wwmc:tin_ingot",
-              "minecraft:copper_ingot"
+              "wwmc:steel_ingot"
             ]
           }
         ]
@@ -17,7 +16,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "wwmc:bronze_blend"
+        "recipe": "wwmc:steel_shovel"
       }
     }
   },
@@ -29,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "wwmc:bronze_blend"
+      "wwmc:steel_shovel"
     ]
   }
 }

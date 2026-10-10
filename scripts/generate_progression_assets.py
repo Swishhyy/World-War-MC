@@ -241,7 +241,9 @@ def main(client_jar, textures_only=False):
         shapeless(base+'_ingot_from_block',['wwmc:'+base+'_block'],'wwmc:'+base+'_ingot',9)
     shaped('raw_tin_block',['III','III','III'],{'I':'wwmc:raw_tin'})
     shapeless('raw_tin_from_block',['wwmc:raw_tin_block'],'wwmc:raw_tin',9)
-    shapeless('bronze_blend',['minecraft:copper_ingot']*3+['wwmc:tin_ingot'],'wwmc:bronze_blend',4)
+    # Bronze blend remains registered for old saves; new alloys use the two-input alloy furnace.
+    (DATA/'wwmc/recipe/bronze_blend.json').unlink(missing_ok=True)
+    (DATA/'wwmc/advancement/recipes/misc/bronze_blend.json').unlink(missing_ok=True)
     for name,ingredient,result in [('tin_from_raw','wwmc:raw_tin','wwmc:tin_ingot'),('tin_from_ore','wwmc:tin_ore','wwmc:tin_ingot'),
                                     ('tin_from_deepslate','wwmc:deepslate_tin_ore','wwmc:tin_ingot'),('bronze_from_blend','wwmc:bronze_blend','wwmc:bronze_ingot')]:
         for cooking,duration in [('smelting',200),('blasting',100)]:

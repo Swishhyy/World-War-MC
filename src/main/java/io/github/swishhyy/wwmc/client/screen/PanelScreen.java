@@ -3,6 +3,7 @@ package io.github.swishhyy.wwmc.client.screen;
 import io.github.swishhyy.wwmc.menu.PanelMenu;
 import io.github.swishhyy.wwmc.menu.PanelView;
 import io.github.swishhyy.wwmc.menu.Panels;
+import io.github.swishhyy.wwmc.menu.TownViews;
 import io.github.swishhyy.wwmc.menu.WwmcNetwork;
 import io.github.swishhyy.wwmc.settlement.JobBoard;
 import io.github.swishhyy.wwmc.settlement.CampaignViews;
@@ -101,11 +102,11 @@ public final class PanelScreen extends AbstractContainerScreen<PanelMenu> {
                 addRenderableWidget(cycle); addRenderableWidget(revoke); continue;
             }
             if(row.key().startsWith("act:")) {
-                String label=row.key().startsWith("act:show:") ? "Show" : row.key().startsWith("act:research:") ? "Study" : row.key().startsWith("act:project:") ? "Build" : row.key().startsWith("act:accept:") ? "Accept" : row.key().startsWith("act:decline:") ? "Decline"
-                        : row.key().startsWith("act:unally:") ? "End / cancel" : row.key().startsWith("act:ally:") ? "Ally" : "Use";
+                String label=row.key().startsWith("act:show:") ? "Show" : row.key().startsWith("act:research:") ? "Unlock" : row.key().startsWith("act:project:") ? "Build" : row.key().startsWith("act:accept:") ? "Accept" : row.key().startsWith("act:decline:") ? "Decline"
+                        : row.key().startsWith("act:unally:") ? "End / cancel" : row.key().startsWith("act:ally:") ? "Ally" : row.key().equals("act:growth:pause") ? "Pause" : row.key().equals("act:growth:resume") ? "Resume" : "Use";
                 if(menu.kind==PanelMenu.Kind.MULTIPLAYER) label=row.key().contains("-accept") ? "Accept" : row.key().contains("-challenge") ? "Challenge" : row.key().contains("-deliver") ? "Deliver"
                         : row.key().contains("-release") ? "Release" : row.key().contains("-post") ? "Post" : row.key().contains("-decline") ? "Decline" : "Cancel";
-                int width=menu.kind==PanelMenu.Kind.RELATIONSHIPS || menu.kind==PanelMenu.Kind.MULTIPLAYER ? 76 : 32;
+                int width=menu.kind==PanelMenu.Kind.RELATIONSHIPS || menu.kind==PanelMenu.Kind.MULTIPLAYER ? 76 : row.key().startsWith("act:research:") || row.key().startsWith("act:growth:") ? 44 : 32;
                 Button use=Button.builder(Component.literal(label),b -> { b.active=false; send(index,1,row.key()); })
                         .bounds(right-width-1,rowY,width,15).build();
                 use.active=row.value()==0; use.setTooltip(Tooltip.create(row.detail())); addRenderableWidget(use); continue;
@@ -118,15 +119,18 @@ public final class PanelScreen extends AbstractContainerScreen<PanelMenu> {
                 lower.setTooltip(Tooltip.create(Component.literal("Lower by "+step))); raise.setTooltip(Tooltip.create(Component.literal("Raise by "+step)));
                 addRenderableWidget(lower); addRenderableWidget(raise); continue;
             }
-            boolean request=row.key().startsWith("request:"),member=row.key().startsWith("member:");
-            int step=request ? row.icon().getMaxStackSize()==1 ? 1 : 16 : 1;
+            boolean production=row.key().startsWith("craft:") || row.key().startsWith("forge:") || row.key().startsWith("alloy:") || row.key().startsWith("scroll:");
+            boolean request=row.key().startsWith("request:") || production,member=row.key().startsWith("member:");
+            int step=production ? row.key().startsWith("scroll:") || row.key().startsWith("alloy:") ? 4 : row.key().startsWith("forge:") && row.icon().getMaxStackSize()>1 ? 4 : 1
+                    : request ? row.icon().getMaxStackSize()==1 ? 1 : 16 : 1;
+            int maximum=production ? 256 : request ? 4096 : member ? 1 : JobBoard.HIGH;
             // A row button works once per refresh, so a double click cannot also hit the row that moves into its place.
             Button lower=Button.builder(Component.literal("-"),b -> { b.active=false; send(index,member ? row.value()-1 : Math.max(0,row.value()-step),row.key()); }).bounds(right-31,rowY,14,15).build();
             lower.active=member || row.value()>JobBoard.OFF;
-            lower.setTooltip(Tooltip.create(Component.literal(request ? "Lower warehouse target by "+step : member ? "Steward to builder; builder to removed" : "Lower priority")));
-            Button raise=Button.builder(Component.literal("+"),b -> { b.active=false; send(index,Math.min(request ? 4096 : member ? 1 : JobBoard.HIGH,row.value()+step),row.key()); }).bounds(right-15,rowY,14,15).build();
-            raise.active=row.value()<(request ? 4096 : member ? 1 : JobBoard.HIGH);
-            raise.setTooltip(Tooltip.create(Component.literal(request ? "Raise warehouse target by "+step : member ? "Promote builder to steward" : "Raise priority")));
+            lower.setTooltip(Tooltip.create(Component.literal(production ? "Lower production stock target by "+step : request ? "Lower warehouse target by "+step : member ? "Steward to builder; builder to removed" : "Lower priority")));
+            Button raise=Button.builder(Component.literal("+"),b -> { b.active=false; send(index,Math.min(maximum,row.value()+step),row.key()); }).bounds(right-15,rowY,14,15).build();
+            raise.active=row.value()<maximum;
+            raise.setTooltip(Tooltip.create(Component.literal(production ? "Raise production stock target by "+step : request ? "Raise warehouse target by "+step : member ? "Promote builder to steward" : "Raise priority")));
             addRenderableWidget(lower); addRenderableWidget(raise);
         }
         shown=view; layout=layout(view);
@@ -135,12 +139,12 @@ public final class PanelScreen extends AbstractContainerScreen<PanelMenu> {
     private static boolean control(PanelView.Row row) { return !row.key().isEmpty() && row.value()>=0; }
     private void send(int index,int value,String key) {
         ClientPacketDistributor.sendToServer(new WwmcNetwork.ActionPayload(menu.containerId,
-                menu.kind==PanelMenu.Kind.MULTIPLAYER ? MultiplayerViews.ROW_ACTION : menu.kind==PanelMenu.Kind.RELATIONSHIPS ? RelationshipViews.ROW_ACTION : menu.kind==PanelMenu.Kind.CAMPAIGN || menu.kind==PanelMenu.Kind.ARMY ? CampaignViews.ROW_ACTION : Panels.JOB,index,value,key));
+                TownViews.focused(menu.kind) ? TownViews.ROW_ACTION : menu.kind==PanelMenu.Kind.MULTIPLAYER ? MultiplayerViews.ROW_ACTION : menu.kind==PanelMenu.Kind.RELATIONSHIPS ? RelationshipViews.ROW_ACTION : menu.kind==PanelMenu.Kind.CAMPAIGN || menu.kind==PanelMenu.Kind.ARMY ? CampaignViews.ROW_ACTION : Panels.JOB,index,value,key));
     }
     private boolean naming() { return menu.kind==PanelMenu.Kind.RELATIONSHIPS && tab==3; }
     private int listTop() { return naming() ? LIST_TOP+24 : LIST_TOP; }
     private List<PanelView.Action> footerActions() { return view().actions().stream().filter(a -> a.id()!=RelationshipViews.RENAME).toList(); }
-    private int controlWidth(PanelView.Row row) { return !control(row) ? 0 : menu.kind==PanelMenu.Kind.RELATIONSHIPS || menu.kind==PanelMenu.Kind.MULTIPLAYER && row.key().startsWith("act:") ? 80 : 34; }
+    private int controlWidth(PanelView.Row row) { return !control(row) ? 0 : row.key().startsWith("act:research:") || row.key().startsWith("act:growth:") ? 48 : menu.kind==PanelMenu.Kind.RELATIONSHIPS || menu.kind==PanelMenu.Kind.MULTIPLAYER && row.key().startsWith("act:") ? 80 : 34; }
     private void rename() { if(townName!=null) ClientPacketDistributor.sendToServer(new WwmcNetwork.ActionPayload(menu.containerId,RelationshipViews.RENAME,0,0,townName.getValue())); }
     @Override public boolean keyPressed(KeyEvent event) {
         if(townName!=null && townName.isFocused() && event.key()!=256) {

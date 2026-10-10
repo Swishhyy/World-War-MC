@@ -1,0 +1,196 @@
+{
+  "variants": {
+    "facing=north,wear=0": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=1": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=2": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=3": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=4": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=5": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=6": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=7": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=8": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=9": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=10": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 0
+    },
+    "facing=north,wear=11": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 0
+    },
+    "facing=east,wear=0": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=1": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=2": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=3": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=4": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=5": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=6": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=7": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=8": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=9": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=10": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 90
+    },
+    "facing=east,wear=11": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 90
+    },
+    "facing=south,wear=0": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=1": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=2": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=3": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=4": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=5": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=6": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=7": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=8": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=9": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=10": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 180
+    },
+    "facing=south,wear=11": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 180
+    },
+    "facing=west,wear=0": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=1": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=2": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=3": {
+      "model": "wwmc:block/bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=4": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=5": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=6": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=7": {
+      "model": "wwmc:block/chipped_bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=8": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=9": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=10": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 270
+    },
+    "facing=west,wear=11": {
+      "model": "wwmc:block/damaged_bronze_anvil",
+      "y": 270
+    }
+  }
+}

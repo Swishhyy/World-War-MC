@@ -277,21 +277,22 @@ public final class VillagerAIWorldTests {
             f.town.populationLevel=1; int before=SettlementService.populationLimit(f.town);
             BlockPos chestPos=warehouse.position().south(2); level.setBlockAndUpdate(chestPos,Blocks.CHEST.defaultBlockState());
             Container stock=(Container)level.getBlockEntity(chestPos);
-            stock.setItem(0,new ItemStack(Items.PAPER,64)); stock.setItem(1,new ItemStack(Items.PAPER,48));
+            stock.setItem(0,new ItemStack(WWMC.RESEARCH_SCROLL.get(),18));
+            var scholar=new CitizenEntity(WWMC.CITIZEN.get(),level); scholar.join(f.town.id); scholar.setNoAi(true);
+            scholar.setPos(desk.getX()+1.5,desk.getY(),desk.getZ()+.5); f.town.citizens.add(scholar.getUUID());
+            f.town.jobs.assign(scholar.getUUID(),research.position()); f.citizens.add(scholar); level.addFreshEntity(scholar);
             stock.setItem(2,new ItemStack(Items.COBBLESTONE,64)); stock.setItem(3,new ItemStack(Items.EMERALD,56));
             stock.setItem(4,new ItemStack(Items.IRON_INGOT,24)); stock.setItem(5,new ItemStack(Items.BRICK,64)); stock.setItem(6,new ItemStack(Items.GOLD_INGOT,32));
             helper.runAtTickTime(5,() -> {
                 var town=f.town;
                 helper.assertTrue(Research.study(level,town,"city_planning").contains("first"),"Population tiers ignored their prerequisites");
-                helper.assertTrue(InventoryOps.count(List.of(stock),s -> s.is(Items.PAPER))==112,"Failed research spent materials");
+                helper.assertTrue(InventoryOps.count(List.of(stock),s -> s.is(WWMC.RESEARCH_SCROLL.get()))==18,"Failed research spent scrolls");
             });
             for(int n=0;n<3;n++) {
                 String id=List.of("housing_plans","civic_planning","city_planning").get(n);
                 helper.runAtTickTime(10+n*10,() -> {
                     var town=f.town; String result=Research.study(level,town,id);
-                    helper.assertTrue(town.progress.project.equals(id) && !Research.has(town,id),"Population research finished without worker time: "+result);
-                    town.progress.projectTicks=Research.byId(id).ticks()-10;
-                    Research.work(level,town,research,desk);
+                    helper.assertTrue(town.progress.project.isEmpty() && Research.has(town,id),"Earned scrolls did not unlock population research: "+result);
                     helper.assertTrue(Research.has(town,id),"Could not study population research: "+result);
                     helper.assertTrue(Research.study(level,town,id).startsWith("Already"),"Population research was charged twice");
                 });
@@ -299,7 +300,7 @@ public final class VillagerAIWorldTests {
             helper.runAtTickTime(45,() -> {
                 var town=f.town;
                 helper.assertTrue(Research.populationBonus(town)==50 && SettlementService.populationLimit(town)==Math.min(Config.MAX_CITIZENS.get(),before+50),"Population research replaced upgrades or failed to raise the cap");
-                helper.assertTrue(InventoryOps.count(List.of(stock),s -> s.is(Items.PAPER) || s.is(Items.EMERALD) || s.is(Items.COBBLESTONE) || s.is(Items.IRON_INGOT) || s.is(Items.BRICK) || s.is(Items.GOLD_INGOT))==0,"Research costs were not exact");
+                helper.assertTrue(InventoryOps.count(List.of(stock),s -> s.is(WWMC.RESEARCH_SCROLL.get()) || s.is(Items.EMERALD) || s.is(Items.COBBLESTONE) || s.is(Items.IRON_INGOT) || s.is(Items.BRICK) || s.is(Items.GOLD_INGOT))==0,"Research costs were not exact");
                 var saved=Settlement.CODEC.parse(JsonOps.INSTANCE,Settlement.CODEC.encodeStart(JsonOps.INSTANCE,town).getOrThrow()).getOrThrow();
                 helper.assertTrue(SettlementService.populationLimit(saved)==SettlementService.populationLimit(town),"Research population bonus did not survive saving");
                 helper.assertTrue(!SettlementService.canGrow(town),"Town can buy unusable upgrades above the server maximum");

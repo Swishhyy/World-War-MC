@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "II ",
+    "IS ",
+    " S "
+  ],
+  "key": {
+    "I": "wwmc:steel_ingot",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "wwmc:steel_axe",
+    "count": 1
+  }
+}

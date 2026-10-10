@@ -19,7 +19,7 @@ public final class GuideBook {
             new Card("wwmc:settlement_banner","1. Found a town","Craft a flag with blue wool and 8 planks. Place it and right-click with an empty hand.","stations"),
             new Card("minecraft:red_bed","2. Add beds","Place Housing beside complete beds. Both halves must fit inside its range.","stations"),
             new Card("minecraft:chest","3. Stock a warehouse","Place Warehouse beside chests. Add ready-to-eat food, tools and fuel.","food"),
-            new Card("minecraft:bell","4. Recruit citizens","Open the town flag and press Recruit. Each citizen needs a housing bed.","people"),
+            new Card("minecraft:bell","4. Recruit citizens","Open the town flag, select People and press Recruit. Each citizen needs a housing bed.","people"),
             new Card("wwmc:farm_station","5. Give them work","Build a Farm and a Courier. Put a separate job barrel beside the farm.","food"),
             new Card("minecraft:writable_book","6. Check the town","Open Needs at the flag. Press Show to find a station with a problem.","help")
         ),List.of("Flag","Beds","Warehouse","Recruit","Jobs"),"Press L for Advancements. The Villager Colonies branch tracks your real progress."),
@@ -27,7 +27,9 @@ public final class GuideBook {
         new Topic("people","Citizens","Recognize their job at a glance",List.of(
             new Card("minecraft:leather_chestplate","Job outfits","Each job has its own outfit. Armor hides the clothing underneath it; uncovered clothes and real tools remain visible."),
             new Card("wwmc:courier_station","One worker per job","Every job block has one worker. Quarries can have a crew. Add stations to add workers."),
-            new Card("minecraft:experience_bottle","Skills & meals","Finished jobs build experience. Several kinds of meals help workers; eating only satisfies hunger."),
+            new Card("minecraft:experience_bottle","Skills & meals","Finished jobs build experience. Better axes, hoes and shovels speed up suitable work; pickaxes already affect mining. Varied meals improve work speed and happiness."),
+            new Card("minecraft:apple","Happy homes","Check People > Wellbeing. Meals they actually eat, enough housing, safety, flowers, bells, lit campfires and books affect happiness. Each amenity type counts once."),
+            new Card("minecraft:red_bed","Grow your population","Two happy, healthy adults with varied meals may have a baby. A spare housing bed, room under the cap and 6 meals plus a food reserve are needed. Babies play near home and take no job until adulthood after 20 loaded minutes. Pause growth at the banner."),
             new Card("wwmc:hospital_station","Hospital recovery","Injured citizens rest in hospital beds until fully healed. These beds never count as housing.","defense")
         ),List.of(),"Empty-hand right-click: open a citizen's bag and status. Sneak-right-click: release their job."),
         new Topic("food","Food & hauling","Keep the supply chain moving",List.of(
@@ -39,7 +41,7 @@ public final class GuideBook {
         new Topic("industry","Mining & workshops","Real tools, real supplies, visible work",List.of(
             new Card("wwmc:mine_station","Mine or quarry","A Mine near exposed ore harvests a replenishing vein; otherwise it digs tunnels. A Quarry digs the chunk its arrow points toward."),
             new Card("minecraft:iron_pickaxe","Tools & upgrades","Better pickaxes dig and replenish faster. Mine and Farm yield upgrades give extra output. Supply floor blocks for tunnels."),
-            new Card("wwmc:craftsman_station","Craft & repair","Teach Craftsman by showing an example item in its screen. Blacksmith needs an anvil, damaged gear and matching repair material."),
+            new Card("wwmc:craftsman_station","Craft & repair","Set stock targets in Production > Workshop for job blocks and supplies, or teach a recipe by example. Use Production > Metalwork for smelter alloy targets and forged equipment; blacksmith repairs run first."),
             new Card("minecraft:enchanting_table","Enchant gear","Put an enchanting table and bookshelves near Enchanter. Supply lapis and plain gear or books. Runes and hand motions show active work.")
         ),List.of(),"No swings or work particles? The worker may be walking, resting or waiting. Open Needs to see why."),
         new Topic("defense","Defense & recovery","Prepare before the next wave",List.of(
@@ -58,11 +60,14 @@ public final class GuideBook {
             new Card("wwmc:trader_station","Connect settlements","Set exports at Trader. Your own towns link immediately; other players must agree. Warehouses and a walkable route are required.")
         ),List.of(),"Alliances share cooperation, not building access. Only the owner changes town permissions and color."),
         new Topic("research","Ages & research","Stone > Bronze > Iron",List.of(
-            new Card("wwmc:researcher_station","Hire a researcher","Place Researcher beside a lectern. Give a citizen this job in Jobs and keep ready-to-eat food available."),
-            new Card("minecraft:paper","Choose a project","Open Campaign > Research at the flag. Supplies are paid from the warehouse once; research advances only while a researcher works at the lectern."),
+            new Card("wwmc:researcher_station","Hire a researcher","Place Researcher beside a lectern. Give a citizen this job in People > Jobs and keep ready-to-eat food available."),
+            new Card("wwmc:research_scroll","Write research scrolls","Researchers spend 2 paper and 1 ink sac or charcoal per scroll, working at a real lectern for 30 seconds. Set their stock target in Research. Scrolls can be traded."),
+            new Card("minecraft:book","Unlock a discovery","Open Research at the flag. Spend earned scrolls and supplies once. Bronze Age needs 3 citizens; Iron Age needs a staffed, furnished smithy. All settlement members share the unlock."),
             new Card("wwmc:tin_ore","Find tin","Tin occurs from Y -32 to 64 in new Overworld terrain. A stone pickaxe can mine it. Smelt raw tin into ingots."),
-            new Card("wwmc:bronze_blend","Make Bronze Blend","Research Bronze Age first. Bronze Blend is the brown lump beside Tin Ingot in the mod tab. Craft 3 Copper Ingots in separate slots with 1 Tin Ingot to get 4 blends, then smelt them into bronze ingots."),
-            new Card("minecraft:iron_sword","Unlock equipment","Iron Age unlocks iron and gold equipment. Gemcraft and Netherite Smithing follow. Found equipment can be stored but cannot be used before its research."),
+            new Card("wwmc:alloy_furnace","Alloy bronze directly","After Bronze Age, build an Alloy Furnace from a furnace, 6 cobblestone and 2 copper ingots. Put 3 copper and 1 tin in the two inputs, plus separate fuel. It yields 4 bronze ingots in 20 seconds. Ingots, raw metals and ores work. Smelters and couriers automate it."),
+            new Card("wwmc:steel_ingot","Discover steel","After Iron Age, staff a smeltery with an Alloy Furnace and research Steelworking. Alloy 1 iron + 1 coal or charcoal, with separate fuel, into 1 steel ingot in 30 seconds. Steel equipment is forged by the blacksmith; it sits between iron and diamond."),
+            new Card("wwmc:bronze_anvil","Build the first smithy","Bronze Age unlocks a copper-based Blacksmith Station and a bronze anvil. Add a furnace and a job barrel. Bronze anvils work 65% slower than iron, with normal anvil wear."),
+            new Card("minecraft:iron_sword","Order forged equipment","Bronze, copper, iron and later equipment must be made by your blacksmith. Set targets in Production > Metalwork. The smith repairs first, then uses real materials and coal/charcoal to forge. Found equipment can be stored until its age is researched."),
             new Card("minecraft:blue_banner","Share progress","The owner and accepted members share research everywhere, including other dimensions. Allies and invitations alone do not grant it. Existing towns retain their old gear access.")
         ),List.of("Stone","Researcher","Tin + copper","Bronze","Iron"),"Research pauses during sleep, danger or blocked access. Check the banner's Research status for the reason. Progress and paid supplies survive saving."),
         new Topic("multiplayer","Settlement neighbours","Trade, supply requests and town news",List.of(
@@ -75,9 +80,9 @@ public final class GuideBook {
         ),List.of("Neighbour","Trade route","Real delivery","Growing towns"),"Towns keep their own storage and research permissions. Build roads and bridges to help caravans reach each other."),
         new Topic("frontier","Projects & exploration","Expand after the town is stable",List.of(
             new Card("minecraft:iron_ingot","Fund projects","Open Campaign > Projects. Furnish the required stations, then pay with real warehouse goods."),
-            new Card("minecraft:compass","Explore together","Camps have captives or stolen supplies. Ruined castles have captains and schematics; castles and mining workshops show real station, furniture and storage setups. Clear sites with equipped guards."),
+            new Card("minecraft:compass","Explore together","Camps have captives or stolen supplies. Ruined castles have captains and schematics; town halls contain salvageable settlement blocks, scrolls and a bronze smithy. Ruins show real station and furniture setups. Clear sites with equipped guards."),
             new Card("minecraft:emerald","Claim regional outposts","After Frontier Charter, claim a cleared site. Ship its regional ore back to your home town."),
-            new Card("minecraft:book","Research upgrades","Campaign > Research starts timed projects for player equipment, population, production, medicine and defenses.","research")
+            new Card("minecraft:book","Research upgrades","Research at the flag spends researcher-made scrolls to unlock equipment, population, production, medicine and defenses.","research")
         ),List.of("Stable town","Projects","Expedition","Regional ore","Research"),"Open Campaign > Journal to review deliveries, projects, losses and victories."),
         new Topic("help","Work stopped?","Check these in order",List.of(
             new Card("minecraft:writable_book","1. Read Needs","Open the flag, select Needs, then Show. The station is outlined in the world."),
@@ -97,7 +102,7 @@ public final class GuideBook {
         new StationHelp(StructureRole.QUARRY,"wwmc:bronze_pickaxe","Facing chunk completely inside claim + barrel","Pickaxes and floor blocks","Excavated blocks; up to 8 workers before upgrades"),
         new StationHelp(StructureRole.SMELTERY,"minecraft:furnace","Furnace or blast furnace + barrel","Raw ores and fuel","Smelted metal"),
         new StationHelp(StructureRole.CRAFTSMAN,"minecraft:crafting_table","Job barrel beside the station","Teach an item; deliver its materials","Keeps learned items in stock"),
-        new StationHelp(StructureRole.BLACKSMITH,"minecraft:iron_ingot","Anvil + job barrel","Damaged gear and matching repair material","Repaired equipment"),
+        new StationHelp(StructureRole.BLACKSMITH,"minecraft:copper_ingot","Bronze/iron anvil + furnace + job barrel","Repair materials, forge ingredients and coal/charcoal","Repaired and forged equipment; alloys"),
         new StationHelp(StructureRole.ENCHANTER,"minecraft:book","Enchanting table + bookshelves + barrel","Lapis and unenchanted gear or books","Enchanted gear; takes several minutes"),
         new StationHelp(StructureRole.GUARD,"minecraft:wooden_sword","Equipped armor stands + barrel","Weapons, arrows and armor","One guard per post"),
         new StationHelp(StructureRole.BARRACKS,"minecraft:stone_sword","Complete beds in range","Equipped guards at their own Guard Stations","More housing; required by Armory"),
@@ -106,7 +111,8 @@ public final class GuideBook {
         new StationHelp(StructureRole.FISHERMAN,"minecraft:fishing_rod","Dry bank, open water 2 blocks deep + barrel","Fishing rod","Whole fish carcasses"),
         new StationHelp(StructureRole.ANIMAL_KEEPER,"minecraft:hay_block","Fenced pen with breeding pairs + barrel","Normal breeding feed and sword or axe","Keeps breeders; harvests surplus adults"),
         new StationHelp(StructureRole.BUTCHER,"minecraft:wooden_axe","Job barrel; station is cutting table","Axe and carcasses","Raw meat for the cook"),
-        new StationHelp(StructureRole.RESEARCHER,"minecraft:lectern","Lectern within station range","Project supplies in the warehouse; food for the researcher","Timed research shared by settlement members"),
+        new StationHelp(StructureRole.RESEARCHER,"minecraft:lectern","Lectern within station range","Paper and ink sac/charcoal in warehouse; meals","Research scrolls for shared discoveries"),
+        new StationHelp(StructureRole.GATHERER,"minecraft:stone_shovel","Cane/bamboo or dry exposed sand, gravel, clay + barrel","Shovel and meals","Paper crops and building materials"),
         new StationHelp(StructureRole.TRADER,"minecraft:compass","One per town, warehouse and walkable route","Choose exports and reserves in its screen","Real shipments between towns")
     );
     public static Topic topic(String id) { return TOPICS.stream().filter(t -> t.id().equals(id)).findFirst().orElse(TOPICS.getFirst()); }

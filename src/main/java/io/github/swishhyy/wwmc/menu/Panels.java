@@ -85,68 +85,33 @@ public final class Panels {
         return town==null ? null : town(level(player),town,player);
     }
     /** Citizens who could join now: free housing beds, within the population limit. */
-    private static int vacancies(ServerLevel level,Settlement town) {
+    public static int vacancies(ServerLevel level,Settlement town) {
         return Math.max(0,Math.min(SettlementService.housingBeds(level,town).size(),SettlementService.populationLimit(town))-town.citizens.size());
     }
     public static PanelView town(ServerLevel level,Settlement town) { return town(level,town,null); }
     public static PanelView town(ServerLevel level,Settlement town,ServerPlayer viewer) {
-        int beds=SettlementService.housingBeds(level,town).size(),free=vacancies(level,town),limit=SettlementService.populationLimit(town);
-        TownJobs jobs=TownJobs.assess(level,town);
-        List<Container> everything=SettlementService.townStorage(level,town);
-        List<Row> overview=new ArrayList<>();
-        List<Row> needs=needRows(level,town);
-        long problems=needs.stream().filter(row -> row.color()!=GREEN).count();
-        long urgent=needs.stream().filter(row -> row.color()==RED).count();
-        overview.add(new Row(icon(Items.WRITABLE_BOOK),Component.literal(problems==0 ? "Nothing needed" : problems+(problems==1 ? " need" : " needs")+(urgent>0 ? ", "+urgent+" urgent" : "")),
-                Component.literal(problems==0 ? "Loaded stations have their workers, storage and supplies" : "See the Needs tab; Show points out each station in the world"),
-                urgent>0 ? RED : problems>0 ? AMBER : GREEN,PanelView.NO_BAR,PanelView.NO_VALUE));
-        overview.add(new Row(icon(WWMC.BANNER_ITEM.get()),"Population",town.citizens.size()+" of "+limit+" citizens allowed, "+beds+" housing beds")
-                .bar(town.citizens.size()/(float)Math.max(1,limit),town.citizens.size()>=limit ? AMBER : GREEN));
-        overview.add(new Row(icon(Items.PAPER),"Jobs",jobs.summary()));
-        overview.add(new Row(icon(WWMC.BANNER_ITEM.get()),"Stations",town.stations.size()+" total; housing, barracks and warehouses provide support, not jobs"));
-        overview.add(new Row(icon(Items.EMERALD),"Population upgrades",SettlementService.populationLevel(town)+" bought"
-                +(SettlementService.canGrow(town) ? "; the next allows "+SettlementService.populationLimitAt(town,SettlementService.populationLevel(town)+1)
-                    +" citizens for "+SettlementService.populationCost(town)+" emeralds" : "; the town is at the server's ceiling")));
-        overview.add(new Row(icon(Items.PAPER),"Population research","+"+Research.populationBonus(town)+" places; study Housing Plans, Civic Planning and City Planning in Campaign / Research"));
-        overview.add(new Row(icon(Items.LECTERN),Research.age(town),Research.progress(town)));
+        int beds=SettlementService.housingBeds(level,town).size(),limit=SettlementService.populationLimit(town);
+        List<Row> needs=needRows(level,town); long problems=needs.stream().filter(r -> r.color()!=GREEN).count();
+        var overview=new ArrayList<Row>();
+        overview.add(new Row(icon(WWMC.BANNER_ITEM.get()),"Population",town.citizens.size()+" / "+limit+" citizens · "+beds+" housing beds · +"+Research.populationBonus(town)+" places from research"));
+        overview.add(new Row(icon(Items.PAPER),"Jobs",TownJobs.assess(level,town).summary()));
+        overview.add(new Row(icon(Items.BREAD),"Food",InventoryOps.count(SettlementService.townStorage(level,town),FoodHealing::food)+" meals in storage"));
+        int happiness=CitizenWellbeing.average(level,town);
+        overview.add(new Row(icon(Items.APPLE),"Happiness: "+happiness+" / 100",CitizenWellbeing.mood(happiness)+" · "+town.progress.children.size()+" children · details in People / Wellbeing").bar(happiness/100F,happiness>=75 ? GREEN : happiness>=50 ? AMBER : RED));
         overview.add(researchStatus(Research.status(level,town)));
-        overview.add(new Row(icon(Items.WRITABLE_BOOK),"Town journal","Citizen promotions and hospital recoveries appear in Campaign / Journal"));
-        overview.add(new Row(icon(Items.BREAD),"Food",InventoryOps.count(everything,FoodHealing::food)+" meals in storage"));
-        overview.add(storage(icon(Items.CHEST),"Warehouse",SettlementService.storage(level,town),"No loaded warehouse with a chest or barrel in range"));
-        int barrels=0;
-        for(Station station:town.stations) barrels+=SettlementService.jobBarrels(level,town,station).size();
-        overview.add(new Row(icon(Items.BARREL),"Job barrels",barrels==0 ? "None: put a barrel in a work station's range"
-                : barrels+" barrels"+(SettlementService.couriers(level,town) ? ", collected by assigned couriers" : "; "+SettlementService.courierAdvice(level,town))));
-        overview.add(new Row(icon(Items.COMPASS),"Claim",town.radius+" blocks from the banner on X and Z"));
-        overview.add(new Row(icon(Items.WHEAT),"Job priorities",switch(town.priority) {
-            case "food" -> "Food preset: farms and cooks first";
-            case "materials" -> "Materials preset: farms and cooks last";
-            case "balanced" -> "Balanced preset: guards and traders first";
-            default -> "Custom: see the Jobs tab";
-        }));
-        overview.add(alarm(town));
-        overview.add(new Row(icon(Items.IRON_SWORD),"Enemy waves",WaveService.status(level,town)+"; "+town.waves+" repelled"));
-        overview.add(new Row(icon(WWMC.TRAP_ITEMS.get(io.github.swishhyy.wwmc.core.TrapKind.WOODEN_SPIKES).get()),"Traps",TrapService.status(level,town)));
-        List<Row> people=new ArrayList<>();
-        List<CitizenEntity> loaded=new ArrayList<>(DefenseService.loadedCitizens(level,town));
-        loaded.sort(Comparator.comparing(citizen -> citizen.getName().getString()));
-        for(CitizenEntity citizen:loaded) people.add(person(town,citizen));
-        if(loaded.size()<town.citizens.size()) people.add(new Row(icon(Items.MAP),(town.citizens.size()-loaded.size())+" more citizens","Out of range: brought back while their station is loaded"));
-        List<Row> stations=new ArrayList<>();
-        for(Station station:town.stations) stations.add(summary(level,town,station));
-        String recruit=free>0 ? "Recruit ("+free+" free)" : town.citizens.size()>=limit ? "Recruit (at limit)" : "Recruit (needs beds)";
-        List<Action> actions=List.of(
-            new Action(PRIORITY,"Preset: "+town.priority,true,"Sets every job's priority: balanced, food first or materials first. "
-                    +"Set single jobs in the Jobs tab. Citizens keep their jobs unless a higher-priority job has an open place."),
-            new Action(ALARM,DefenseService.alarmed(town) ? "Sound the all-clear" : "Sound the alarm",true,
-                    "Sends civilians to cover and every guard on duty, or ends the alarm"),
-            new Action(RECRUIT,recruit,free>0,"A citizen needs a free housing bed and room under the population limit of "+limit),
-            grow(town,viewer),new Action(CampaignViews.OPEN,"Campaign",true,"Warehouse requests, projects, squads, expedition sites and the town journal"),
-            new Action(RelationshipViews.OPEN,"Relationships",true,"Player permissions, invitations, alliances and town naming"),
-            new Action(MultiplayerViews.OPEN,"Neighbours",true,"Nearby towns, caravan deliveries, settlement contracts and news"));
-        return new PanelView(Component.literal(town.name),Component.literal(town.citizens.size()+" citizens · "+jobs.assigned()+"/"+jobs.places()+" jobs · "
-                +(problems==0 ? "no needs" : problems+(problems==1 ? " need" : " needs"))),
-                List.of(new Tab("Overview",overview),new Tab("Needs",needs),new Tab("Jobs",jobRows(town,jobs)),new Tab("Citizens",people),new Tab("Stations",stations)),actions);
+        overview.addAll(needs.stream().filter(r -> r.color()!=GREEN).limit(1).toList());
+        var more=List.of(
+                new Row(icon(Items.BELL),Component.literal("Alarm: "+DefenseService.status(town)),Component.literal("Shelter civilians and put guards on duty; toggle the all-clear when safe."),0,-1,0,"act:alarm"),
+                new Row(icon(Items.FILLED_MAP),Component.literal("Expeditions and projects"),Component.literal("Army, ruined sites, outposts, supply projects and town journal"),0,-1,0,"act:campaign"),
+                new Row(icon(Items.NAME_TAG),Component.literal("Town settings"),Component.literal("Name, colours, permissions, invitations and alliances"),0,-1,0,"act:relationships"),
+                new Row(icon(Items.MAP),Component.literal("Settlement map"),Component.literal("Claims, routes, ruins and shared markers"),0,-1,0,"act:map"),
+                new Row(icon(Items.PAPER),"Population research","+"+Research.populationBonus(town)+" places from housing discoveries"));
+        return new PanelView(Component.literal(town.name),Component.literal(Research.age(town)+" · "+(problems==0 ? "Your settlement at a glance" : problems+" needs attention")),
+                List.of(new Tab("Overview",overview),new Tab("Needs",needs),new Tab("More",more)),
+                List.of(new Action(TownViews.PEOPLE,"People",true,"Citizens, jobs, recruitment and housing"),
+                        new Action(TownViews.PRODUCTION,"Production",true,"Stock, automatic workshops and blacksmith orders"),
+                        new Action(TownViews.RESEARCH,"Research",true,"Scroll production, requirements and discoveries"),
+                        new Action(MultiplayerViews.OPEN,"Neighbours",true,"Trade, relationships and news")));
     }
     /** A separate short status row keeps the reason visible beside the project's percentage and work time. */
     public static Row researchStatus(Research.Status status) {
@@ -189,7 +154,7 @@ public final class Panels {
         return distance+" blocks "+names[Math.floorMod((int)Math.round(angle/45.0),8)];
     }
     /** The population upgrade button: its price, and greyed out when unaffordable or at the ceiling. */
-    private static Action grow(Settlement town,ServerPlayer viewer) {
+    public static Action grow(Settlement town,ServerPlayer viewer) {
         if(!SettlementService.canGrow(town)) return new Action(GROW,"Population: maxed",false,"The town is at the server's ceiling of "+Config.MAX_CITIZENS.get()+" citizens");
         int cost=SettlementService.populationCost(town),next=SettlementService.populationLimitAt(town,SettlementService.populationLevel(town)+1);
         return new Action(GROW,"Grow: "+cost+" emeralds",affords(viewer,cost),"Raise the limit from "+SettlementService.populationLimit(town)+" to "+next
@@ -208,11 +173,12 @@ public final class Panels {
         BlockPos home=town.jobs.home(citizen.getUUID());
         return home==null ? null : town.station(home);
     }
-    private static Row person(Settlement town,CitizenEntity citizen) {
+    public static Row person(Settlement town,CitizenEntity citizen) {
         Station job=home(town,citizen);
         float health=citizen.getHealth()/Math.max(1,citizen.getMaxHealth());
         return new Row(job==null ? icon(Items.PAPER) : stationIcon(job.role()),citizen.getName().getString(),
-                (job==null ? "No job" : CitizenSkill.title(citizen.skillLevel(job.role()))+" "+job.role().title().toLowerCase(Locale.ROOT))+": "+citizen.activity()).bar(health,health<0.5F ? RED : GREEN);
+                (citizen.isBaby() ? "Child · grows up in "+Math.max(1,(-citizen.getAge()+1199)/1200)+" min" : job==null ? "No job" : CitizenSkill.title(citizen.skillLevel(job.role()))+" "+job.role().title().toLowerCase(Locale.ROOT))
+                        +": "+citizen.activity()+" · happiness "+citizen.happiness()+"/100").bar(health,health<0.5F ? RED : GREEN);
     }
     private static Row storage(ItemStack icon,String name,List<Container> containers,String none) {
         if(containers.isEmpty()) return new Row(icon,name,none);
@@ -226,11 +192,18 @@ public final class Panels {
         if(town==null) return;
         ServerLevel level=level(player);
         switch(action) {
+            case TownViews.PEOPLE -> TownViews.open(player,town,PanelMenu.Kind.PEOPLE);
+            case TownViews.PRODUCTION -> TownViews.open(player,town,PanelMenu.Kind.PRODUCTION);
+            case TownViews.RESEARCH -> TownViews.open(player,town,PanelMenu.Kind.RESEARCH);
             case RelationshipViews.OPEN -> RelationshipViews.open(player,town);
             case CampaignViews.OPEN -> CampaignViews.open(player,town);
             case MultiplayerViews.OPEN -> MultiplayerViews.open(player,town);
             case PRIORITY -> SettlementService.applyPreset(level,town,JobBoard.PRESETS.get((JobBoard.PRESETS.indexOf(town.priority)+1)%JobBoard.PRESETS.size()));
             case JOB -> {
+                if(key.equals("act:alarm")) { DefenseService.toggle(level,town); return; }
+                if(key.equals("act:campaign")) { CampaignViews.open(player,town); return; }
+                if(key.equals("act:relationships")) { RelationshipViews.open(player,town); return; }
+                if(key.equals("act:map")) { player.closeContainer(); SettlementMap.open(player); return; }
                 if(key.startsWith("act:show:")) { show(player,town,key.substring(9)); return; }
                 StructureRole role=workRole(key);
                 if(role!=null && value>=JobBoard.OFF && value<=JobBoard.HIGH) SettlementService.setJobLevel(level,town,role,value);
@@ -264,7 +237,7 @@ public final class Panels {
      * One row per job the town has stations for: its priority, with buttons to change it, and who holds its places.
      * Rows keep a fixed order so they do not move under the buttons.
      */
-    private static List<Row> jobRows(Settlement town,TownJobs jobs) {
+    public static List<Row> jobRows(Settlement town,TownJobs jobs) {
         List<Row> rows=new ArrayList<>();
         rows.add(new Row(icon(Items.PAPER),"Jobs: "+jobs.assigned()+"/"+jobs.places()+" filled",jobs.unassigned()+" unassigned; "+jobs.open()
                 +" loaded openings, "+jobs.off()+" switched-off places, "+jobs.waiting()+" places waiting for loading or trade"));
@@ -290,7 +263,7 @@ public final class Panels {
         return rows;
     }
     /** One line for the town's station list. */
-    private static Row summary(ServerLevel level,Settlement town,Station station) {
+    public static Row summary(ServerLevel level,Settlement town,Station station) {
         List<Row> lines=status(level,town,station);
         String first=lines.isEmpty() ? "" : lines.getFirst().detail().getString();
         return new Row(stationIcon(station.role()),station.role().title()+" Station",station.position().toShortString()+" · "
@@ -316,6 +289,9 @@ public final class Panels {
             actions.add(new Action(PATROL_CLEAR,plan.patrol().isEmpty() ? "No marked route" : "Clear route ("+plan.patrol().size()+")",!plan.patrol().isEmpty(),
                     "The guard picks its own rounds around the town's stations again"));
         }
+        if(role==StructureRole.BLACKSMITH || role==StructureRole.CRAFTSMAN)
+            actions.add(new Action(TownViews.PRODUCTION,"Production orders",true,"Set automatic workshop, forging and metallurgy targets"));
+        if(role==StructureRole.RESEARCHER) actions.add(new Action(TownViews.RESEARCH,"Research",true,"Scroll production and settlement discoveries"));
         for(Upgrades.Kind kind:Upgrades.Kind.values()) if(kind.supports(role)) actions.add(upgrade(station,kind,viewer));
         if(role.providesWork()) {
             int priority=town.jobs.level(role);
@@ -431,7 +407,17 @@ public final class Panels {
             }
             case SMELTERY -> rows.add(new Row(icon(Items.FURNACE),"Furnaces",SettlementService.processingDevices(level,town,station).size()+" furnaces or blast furnaces in range"));
             case COOK -> rows.add(new Row(icon(Items.SMOKER),"Kitchen",SettlementService.processingDevices(level,town,station).size()+" furnaces, smokers or lit campfires; bread "+(town.disabledRecipes.contains("bread") ? "off" : "on")));
-            case BLACKSMITH -> rows.add(new Row(icon(Items.ANVIL),"Anvils",SettlementService.anvils(level,town,station).size()+" anvils; repairs warehouse gear and worn stand armor"));
+            case BLACKSMITH -> {
+                rows.add(new Row(icon(Items.ANVIL),"Blacksmith",SettlementService.anvils(level,town,station).size()+" anvils; repairs damaged equipment and fills forge orders"));
+                rows.add(new Row(icon(Items.FURNACE),"Forge heat",ForgeWorkshop.heat(level,town,station).size()+" furnaces; new equipment and alloys also need coal/charcoal"));
+                for(BlockPos at:SettlementService.anvils(level,town,station)) if(level.getBlockState(at).getBlock() instanceof io.github.swishhyy.wwmc.block.BronzeAnvilBlock) {
+                    String condition=switch(level.getBlockState(at).getValue(io.github.swishhyy.wwmc.block.BronzeAnvilBlock.WEAR)/4) {
+                        case 0 -> "Fresh"; case 1 -> "Chipped"; default -> "Damaged";
+                    };
+                    rows.add(new Row(icon(WWMC.BRONZE_ANVIL_ITEM.get()),"Bronze anvil",condition+" · 65% slower than iron · "+at.toShortString()));
+                }
+            }
+            case GATHERER -> rows.add(new Row(icon(Items.STONE_SHOVEL),"Gathering","Needs a shovel; harvests cane and bamboo tops, plus dry exposed sand, gravel and clay. Plant bases and construction are preserved."));
             case CRAFTSMAN -> rows.add(new Row(icon(Items.CRAFTING_TABLE),"Orders",town.craftOrders.size()+" learned recipes"));
             case COURIER -> rows.add(new Row(icon(Items.BUNDLE),"Deliveries","The only town haulers: collect job goods and deliver tools, materials, carcasses and feed through the warehouse"));
             case TRADER -> rows.add(new Row(icon(Items.COMPASS),"Trade route",town.trading.status));
@@ -475,6 +461,9 @@ public final class Panels {
         Station station=stationAt(player,pos);
         if(station==null) return;
         Settlement town=owned(player,pos);
+        if(action==TownViews.PRODUCTION || action==TownViews.RESEARCH) {
+            TownViews.open(player,town,action==TownViews.PRODUCTION ? PanelMenu.Kind.PRODUCTION : PanelMenu.Kind.RESEARCH,pos); return;
+        }
         if(action==RANGE_UP || action==CREW_UP || action==YIELD_UP) SettlementService.upgradeStation(level(player),player,town,station,
                 action==RANGE_UP ? Upgrades.Kind.RANGE : action==CREW_UP ? Upgrades.Kind.CREW : Upgrades.Kind.YIELD);
         else if(action==BREAD && station.role()==StructureRole.COOK) {
@@ -510,7 +499,7 @@ public final class Panels {
             Item item=order.resolve();
             int have=Workshop.stock(stock,order);
             boolean materials=Workshop.plans(recipes,order).stream().anyMatch(plan -> Workshop.batches(recipes,town.craftOrders,order,plan,stock,1)>0);
-            String note=item==Items.AIR ? "Unknown item" : order.target()==0 ? "Paused" : have>=order.target() ? "Stocked"
+            String note=item==Items.AIR ? "Unknown item" : ForgeWorkshop.forged(new ItemStack(item)) ? "Order from the blacksmith in Production / Forge" : order.target()==0 ? "Paused" : have>=order.target() ? "Stocked"
                     : materials ? "Ready to craft" : "Missing materials";
             int color=order.target()==0 ? GRAY : have>=order.target() ? GREEN : materials ? AMBER : RED;
             orders.add(new Row(new ItemStack(item),new ItemStack(item).getHoverName().copy().append(order.anyWood() ? " (any wood)" : ""),
@@ -555,7 +544,7 @@ public final class Panels {
         List<Row> status=new ArrayList<>();
         StructureRole role=citizen.skillRole();
         int skill=citizen.skillLevel(role);
-        status.add(new Row(job==null ? icon(Items.PAPER) : stationIcon(job.role()),job==null ? "No job"
+        status.add(new Row(job==null ? icon(Items.PAPER) : stationIcon(job.role()),citizen.isBaby() ? "Child · grows up in "+Math.max(1,(-citizen.getAge()+1199)/1200)+" min" : job==null ? "No job"
                 : CitizenSkill.title(skill)+" "+job.role().title().toLowerCase(Locale.ROOT)+" at "+job.position().toShortString(),citizen.activity()));
         float health=citizen.getHealth()/Math.max(1,citizen.getMaxHealth());
         status.add(new Row(icon(Items.GOLDEN_APPLE),"Health",Math.round(citizen.getHealth())+" / "+Math.round(citizen.getMaxHealth())).bar(health,health<0.5F ? RED : GREEN));
@@ -566,8 +555,14 @@ public final class Panels {
         List<Row> skills=new ArrayList<>();
         List<String> meals=citizen.recentMeals();
         int morale=MealVariety.bonus(meals);
-        skills.add(new Row(icon(Items.EXPERIENCE_BOTTLE),(role==null ? "No job" : CitizenSkill.title(skill)+" "+role.title().toLowerCase(Locale.ROOT))+" · "+MealVariety.mood(meals),
+        skills.add(new Row(icon(Items.EXPERIENCE_BOTTLE),(citizen.isBaby() ? "Child" : role==null ? "No job" : CitizenSkill.title(skill)+" "+role.title().toLowerCase(Locale.ROOT))+" · happiness "+citizen.happiness()+"/100",
                 (role==null ? "" : CitizenSkill.perk(role,skill)+"; ")+(morale>0 ? "varied meals: "+morale+"% faster" : "varied meals would add up to 8% speed")));
+        if(town!=null) {
+            var outlook=CitizenWellbeing.outlook(citizen,CitizenWellbeing.conditions(level,town));
+            skills.add(new Row(icon(Items.APPLE),"Happiness: "+CitizenWellbeing.mood(citizen.happiness()),outlook.reason()+" · gradually moving toward "+outlook.target()+"/100"));
+        }
+        int toolBonus=WorkerTools.bonus(role,citizen.getMainHandItem());
+        if(toolBonus>0) skills.add(new Row(citizen.getMainHandItem().copy(),"Tool quality: +"+toolBonus+"% work speed","Better axes, hoes and shovels improve suitable gathering work. Mining already uses the pickaxe's actual break speed."));
         for(StructureRole known:StructureRole.values()) {
             int points=citizen.experience(known);
             if(points<=0 && known!=role) continue;

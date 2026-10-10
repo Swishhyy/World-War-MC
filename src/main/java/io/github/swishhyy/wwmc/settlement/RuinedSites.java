@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 /** Finite expedition ruins double as examples of real station/furniture layouts. Never rebuilt after discovery. */
 public final class RuinedSites {
     private RuinedSites() {}
-    public static int radius(String kind) { return kind.equals("fort") ? 10 : kind.equals("mine") ? 7 : 5; }
+    public static int radius(String kind) { return kind.equals("fort") ? 10 : kind.equals("townhall") ? 8 : kind.equals("mine") ? 7 : 5; }
     private static void put(ServerLevel level,BlockPos pos,BlockState state) {
         level.setBlock(pos,state,3); WorldWorkData.get(level).protect(pos);
     }
@@ -30,7 +30,29 @@ public final class RuinedSites {
             put(level,c.offset(x,-1,z),(Math.floorMod(x*7+z*13,5)==0 ? Blocks.MOSSY_STONE_BRICKS : Blocks.STONE_BRICKS).defaultBlockState());
             for(int y=0;y<=6;y++) level.setBlock(c.offset(x,y,z),Blocks.AIR.defaultBlockState(),3);
         }
-        if(site.kind.equals("fort")) castle(level,c); else workshop(level,c);
+        if(site.kind.equals("fort")) castle(level,c); else if(site.kind.equals("townhall")) townhall(level,c); else workshop(level,c);
+    }
+    /** A broken civic hall shows how support, research and production rooms fit together. */
+    private static void townhall(ServerLevel level,BlockPos c) {
+        for(int x=-7;x<=7;x++) for(int z=-7;z<=7;z++) {
+            if(Math.abs(x)!=7 && Math.abs(z)!=7 || z==7 && Math.abs(x)<=2) continue;
+            int height=2+Math.floorMod(x*3+z*11,3);
+            for(int y=0;y<height;y++) if(y!=1 || Math.floorMod(x+z,4)!=0)
+                put(level,c.offset(x,y,z),(y==0 ? Blocks.STONE_BRICKS : Blocks.OAK_PLANKS).defaultBlockState());
+        }
+        for(int x=-7;x<=7;x++) for(int z=-7;z<=0;z++) if(Math.floorMod(x*7+z*11,5)>1)
+            put(level,c.offset(x,4,z),Blocks.OAK_PLANKS.defaultBlockState());
+        put(level,c.north(3),WWMC.BANNER.get().defaultBlockState());
+        station(level,c,0,-5,StructureRole.RESEARCHER); put(level,c.north(4),Blocks.LECTERN.defaultBlockState());
+        station(level,c,-5,1,StructureRole.HOUSING); bed(level,c.offset(-6,0,3)); bed(level,c.offset(-5,0,3));
+        station(level,c,5,1,StructureRole.WAREHOUSE); put(level,c.offset(6,0,2),Blocks.BARREL.defaultBlockState());
+        station(level,c,-4,-4,StructureRole.CRAFTSMAN); put(level,c.offset(-5,0,-4),Blocks.CRAFTING_TABLE.defaultBlockState());
+        put(level,c.offset(-4,0,-6),Blocks.BARREL.defaultBlockState());
+        station(level,c,4,-4,StructureRole.BLACKSMITH); put(level,c.offset(5,0,-4),WWMC.BRONZE_ANVIL.get().defaultBlockState());
+        put(level,c.offset(5,0,-6),Blocks.FURNACE.defaultBlockState()); put(level,c.offset(3,0,-6),Blocks.BARREL.defaultBlockState());
+        station(level,c,5,4,StructureRole.GATHERER); put(level,c.offset(6,0,5),Blocks.BARREL.defaultBlockState());
+        for(BlockPos p:java.util.List.of(c.offset(-2,0,5),c.offset(2,0,5),c.offset(-2,0,-1),c.offset(2,0,-1)))
+            put(level,p,Blocks.TORCH.defaultBlockState());
     }
     private static void castle(ServerLevel level,BlockPos c) {
         // An open south gate and broken parapets keep the courtyard accessible without demolishing the example rooms.

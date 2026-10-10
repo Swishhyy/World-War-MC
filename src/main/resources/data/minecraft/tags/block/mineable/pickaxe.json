@@ -8,6 +8,8 @@
     "wwmc:bronze_block",
     "wwmc:bronze_snare",
     "wwmc:bronze_caltrops",
-    "wwmc:iron_spring_trap"
+    "wwmc:iron_spring_trap",
+    "wwmc:bronze_anvil",
+    "wwmc:alloy_furnace"
   ]
 }

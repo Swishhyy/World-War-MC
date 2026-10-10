@@ -4,6 +4,10 @@
     "wwmc:bronze_helmet",
     "wwmc:bronze_chestplate",
     "wwmc:bronze_leggings",
-    "wwmc:bronze_boots"
+    "wwmc:bronze_boots",
+    "wwmc:steel_helmet",
+    "wwmc:steel_chestplate",
+    "wwmc:steel_leggings",
+    "wwmc:steel_boots"
   ]
 }

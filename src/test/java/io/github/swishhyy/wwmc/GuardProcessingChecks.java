@@ -63,7 +63,11 @@ public final class GuardProcessingChecks {
             assertTrue(processable(server,StructureRole.SMELTERY,RecipeType.BLASTING,new ItemStack(item)));
         }
         assertTrue(processable(server,StructureRole.SMELTERY,RecipeType.SMELTING,new ItemStack(Items.DIAMOND_ORE)));
-        assertFalse(processable(server,StructureRole.SMELTERY,RecipeType.SMELTING,new ItemStack(Items.COBBLESTONE)),"Smelters only process raw metals and ores");
+        for(var item:List.of(Items.SAND,Items.RED_SAND,Items.CLAY_BALL,Items.CLAY,Items.OAK_LOG)) {
+            assertTrue(processable(server,StructureRole.SMELTERY,RecipeType.SMELTING,new ItemStack(item)),"Furnaces process building materials and charcoal");
+            assertFalse(processable(server,StructureRole.SMELTERY,RecipeType.BLASTING,new ItemStack(item)),"A blast furnace cannot invent a building-material recipe");
+        }
+        assertFalse(processable(server,StructureRole.SMELTERY,RecipeType.SMELTING,new ItemStack(Items.COBBLESTONE)),"Smelters leave general stone recipes to the player");
         for(var item:List.of(Items.BEEF,Items.CHICKEN,Items.PORKCHOP,Items.COD,Items.POTATO,Items.KELP)) {
             assertTrue(processable(server,StructureRole.COOK,RecipeType.SMOKING,new ItemStack(item)));
             assertTrue(processable(server,StructureRole.COOK,RecipeType.CAMPFIRE_COOKING,new ItemStack(item)));

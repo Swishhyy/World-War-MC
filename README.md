@@ -17,15 +17,23 @@ Formerly **World War MC**. The internal `wwmc` namespace keeps existing worlds, 
 ## Features
 
 - **A working town:** named citizens, dedicated job stations, housing, warehouses, and couriers.
-- **Production:** farms, lumber work, mines, quarries, cooking, crafting, smelting, enchanting, and equipment repair.
+- **Production:** farms, forests, gatherers, mines, quarries, cooking, workshops, metallurgy, forging, enchanting, and repairs.
 - **Friends and trade:** town permissions, alliances, and traders who carry goods between settlements.
 - **Settlement neighbours:** real caravans, paid supply contracts, nearby-town needs and quiet news at the banner. NPC towns arrange their own trade routes. See [settlement interactions](docs/multiplayer-campaign.md#settlement-neighbours).
 - **Defense and exploration:** guards, patrols, raids, bandit camps, and supplied outposts.
 - **Visible progress:** job outfits and work effects, town colors, upgrades, research, a visual handbook, and tutorial advancements.
-- **Settlement ages:** Stone → Bronze → Iron, with researchers, tin, bronze equipment, and shared unlocks for town members.
+- **Settlement ages:** Stone → Bronze → Iron. Researchers make tradeable scrolls; towns unlock discoveries together, and blacksmiths forge advanced equipment.
+- **Happiness and families:** varied meals, housing and amenities keep citizens happy. With spare food and beds, happy adults can have children who play and grow before taking jobs.
+- **Alloys and better tools:** smelters make bronze and steel in a two-input alloy furnace. Better tools help workers finish jobs faster; Steelworking unlocks steel equipment within the Iron Age.
 - **Traps:** spikes, nets, snares, caltrops and spring traps, with saved wear, paid maintenance and waves arriving beyond the town's stations and traps. See [trap defenses](docs/defenses.md).
 
 Larger warfare systems, countries, automatic building, and distant settlement simulation remain [planned features](docs/ROADMAP.md).
+
+## Latest source changes
+
+The latest source adds **settlement forging, researcher-made scrolls, gatherers, ruined town halls, happiness, children, and steel**. The banner opens a short overview with **People, Production, Research, and Neighbours**. Set workshop and metalwork stock targets in Production, including automatic job block orders. Smelters make alloys; blacksmiths repair and forge equipment. Wood and stone gear remain player-crafted.
+
+Use a successful [main Actions build](https://github.com/Swishhyy/Villager-Colonies/actions?query=branch%3Amain) for these changes. The version stays **0.1.0.0**. See [settlement production](docs/settlement-production.md) for recipes, wellbeing and the progression loop. [Education](docs/education-design.md) is still a proposal.
 
 ## Install
 
@@ -51,10 +59,10 @@ Replace the previous WWMC or Villager Colonies JAR; keep only one copy in the fo
 2. **Found your town.** Place a **Settlement Banner** on open, solid ground and right-click it with an empty hand.
 3. **Add housing and supplies.** Put beds near a **Housing Station** and chests or barrels near a **Warehouse Station**. Ordinary stations detect furniture within **three blocks on each axis**.
 4. **Set up your first jobs.** Add a **Farm Station**, a **Lumber Station**, and a **Courier Station**. Put barrels beside the work stations and stock food, tools, and saplings in the warehouse.
-5. **Recruit citizens.** Use the settlement banner's screen to recruit and manage jobs. Add a **Cook Station** and the other jobs you need as the town grows.
-6. **Research the next age.** Add a **Researcher Station** and a nearby lectern, then choose a project under **Campaign → Research**. Supply the warehouse and let the researcher work. See [ages and research](docs/settlement-guide.md#ages-and-research).
+5. **Recruit citizens.** Open **People** at the banner to recruit and manage jobs. Add a **Cook Station** and the other jobs you need as the town grows.
+6. **Research the next age.** Add a **Researcher Station** and a nearby lectern. Supply paper and ink sacs or charcoal in the warehouse so researchers can write scrolls, then spend them under **Research** to unlock discoveries. See [ages and research](docs/settlement-guide.md#ages-and-research).
 
-Right-click a banner, station, or citizen to open its screen. The banner's **Needs** tab helps you find shortages; **Relationships** manages player access and town alliances. Press **?** on a town or station screen for relevant help.
+Right-click a banner, station, or citizen to open its screen. The banner leads to **People**, **Production**, **Research** and **Neighbours**. **Needs** shows shortages; **More** contains projects, settings and the map. Press **?** for relevant help.
 
 Most job blocks employ **one citizen**; quarries support a crew. Injured citizens recover in **Hospital Station beds**, rather than by eating.
 
@@ -63,6 +71,7 @@ Most job blocks employ **one citizen**; quarries support a crew. Injured citizen
 | I want to... | Read this |
 | --- | --- |
 | Learn stations, recipes, jobs, and storage | [Settlement guide](docs/settlement-guide.md) |
+| Automate job blocks, forge equipment, or make research scrolls | [Settlement production](docs/settlement-production.md) |
 | Fix cooking, improve yields, or heal citizens | [Production and recovery](docs/production-recovery.md) |
 | Invite friends, trade, lead squads, and build outposts | [Multiplayer and campaign](docs/multiplayer-campaign.md) |
 | Recover a server with missing Overworld settings | [Server startup help](docs/server-startup.md) |
@@ -84,6 +93,6 @@ On Windows, use `gradlew.bat build` and `gradlew.bat runClient`. The mod JAR is 
 
 Original mod code is [MIT licensed](LICENSE). The NeoForge starter notice is preserved in [TEMPLATE_LICENSE.txt](TEMPLATE_LICENSE.txt).
 
-Bronze and tin textures recolor Minecraft's vanilla assets by Mojang. See [texture sources and regeneration](docs/development.md#metal-texture-recolors).
+Bronze, tin and steel textures recolor Minecraft's vanilla assets by Mojang. See [texture sources and regeneration](docs/development.md#metal-texture-recolors).
 
 Inspired by [Colony Survival](https://store.steampowered.com/app/366090/Colony_Survival/). Villager Colonies uses original mod code and does not include Colony Survival content.

@@ -108,7 +108,7 @@ public final class SettlementWorldTests {
             RelationshipViews.act(owner,start,RelationshipViews.ROW_ACTION,0,"permission:"+friend.getUUID());
             helper.assertTrue(ClaimProtection.denied(level,friend,start) && !RelationshipViews.valid(friend,start) && use(friend,stock).isCanceled(),"Revocation retained access or an open management screen");
             var screen=Panels.town(level,a,owner);
-            helper.assertTrue(screen.actions().stream().anyMatch(action -> action.id()==RelationshipViews.OPEN && action.label().getString().equals("Relationships")),"The town flag has no dedicated Relationships button");
+            helper.assertTrue(screen.tabs().stream().flatMap(t -> t.rows().stream()).anyMatch(row -> row.key().equals("act:relationships")),"Town settings are inaccessible from More");
             leave(level,a,b); CitizenNavigationTests.release(level,start,firstChunks); CitizenNavigationTests.release(level,second,secondChunks); helper.succeed();
         });
     }

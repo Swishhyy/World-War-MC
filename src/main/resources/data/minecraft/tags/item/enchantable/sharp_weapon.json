@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "wwmc:bronze_sword",
-    "wwmc:bronze_axe"
+    "wwmc:bronze_axe",
+    "wwmc:steel_sword",
+    "wwmc:steel_axe"
   ]
 }

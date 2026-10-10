@@ -26,12 +26,12 @@ public final class StationDetection {
     }
     public static boolean processingBlock(StructureRole role,BlockState state) {
         return switch(role) {
-            case SMELTERY -> state.is(Blocks.FURNACE) || state.is(Blocks.BLAST_FURNACE);
+            case SMELTERY -> state.is(Blocks.FURNACE) || state.is(Blocks.BLAST_FURNACE) || state.is(io.github.swishhyy.wwmc.WWMC.ALLOY_FURNACE.get());
             case COOK -> state.is(Blocks.FURNACE) || state.is(Blocks.SMOKER) || state.getBlock() instanceof CampfireBlock && state.getValue(CampfireBlock.LIT);
             default -> false;
         };
     }
-    public static boolean anvil(BlockState state) { return state.is(BlockTags.ANVIL); }
+    public static boolean anvil(BlockState state) { return state.is(BlockTags.ANVIL) || state.getBlock() instanceof io.github.swishhyy.wwmc.block.BronzeAnvilBlock; }
     public static boolean enchantingTable(BlockState state) { return state.getBlock() instanceof EnchantingTableBlock; }
     public static boolean workBlock(StructureRole role, BlockState state) {
         return switch(role) {

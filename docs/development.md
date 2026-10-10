@@ -104,3 +104,9 @@ Keep the first playable scope small, preserve real resource accounting, and make
 Original mod code is [MIT licensed](../LICENSE). The generated NeoForge starter's notice remains in [TEMPLATE_LICENSE.txt](../TEMPLATE_LICENSE.txt). Inspiration is a gameplay reference; this project does not include Colony Survival code or assets.
 
 Recolored bronze and tin textures derive from Minecraft assets by Mojang. Their source paths and color palettes are recorded in `scripts/generate_progression_assets.py`; Minecraft's original artwork is not authored by this project.
+
+## Wellbeing and alloy checks
+
+The world suite exercises actual varied meals and remainder returns, cached amenity removal, gradual happiness and native entity saves; scheduled food-funded births, saved loaded-time cooldowns, job-free children and actual adulthood; alloy research locks, exact ingredient/fuel costs, full output, furnace save/load, inventory drops, menu transfers and native hopper sides. Courier/smelter and steel-to-blacksmith scenarios use real inventories and workers. Native tool components drive bounded bonuses; miners retain their existing block-break timing.
+
+Generate the new assets after the base progression and production generators with `python3 scripts/generate_alloy_assets.py --client-jar /path/to/26.2.jar`. Steel reuses native iron silhouettes, wooden handles, armor UVs and alpha masks; alloy furnace animation retains the native frame metadata.

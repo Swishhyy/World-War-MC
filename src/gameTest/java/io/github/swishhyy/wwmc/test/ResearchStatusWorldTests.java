@@ -44,8 +44,8 @@ public final class ResearchStatusWorldTests {
             Container stock=stock(level,warehouse);
             var viewer=new FakePlayer(level,new GameProfile(town.owner,"ResearchOwner"));
             viewer.setPos(station.position().getX()+.5,station.position().getY(),station.position().getZ()+1.5);
-            helper.assertTrue(Research.status(level,town).state()==Research.WorkState.IDLE,"No project must show a choice, not a pause");
-            helper.assertTrue(Research.study(level,town,"bronze_age").contains("started"),"Could not start the paid project");
+            helper.assertTrue(Research.status(level,town).paused(),"Scroll writing must explain the missing researcher");
+            legacyProject(town,stock);
             town.progress.projectTicks=1230;
             var worker=worker(level,town,station,station.position().south(),false);
             town.jobs.release(worker.getUUID());
@@ -129,7 +129,7 @@ public final class ResearchStatusWorldTests {
             enclosure(level,firstDesk,true);
             CitizenEntity a=worker(level,town,first,start.east(8),true),b=worker(level,town,second,start.east(26),false);
             var viewer=new FakePlayer(level,new GameProfile(town.owner,"RouteOwner"));
-            helper.assertTrue(Research.study(level,town,"bronze_age").contains("started"),"Could not start the route fixture's project");
+            legacyProject(town,stock);
             int[] phase={0},frozen={0}; long[] stoppedAt={0};
             helper.succeedWhen(() -> {
                 var status=Research.status(level,town);
@@ -170,6 +170,11 @@ public final class ResearchStatusWorldTests {
         SettlementData.get(level).settlements.add(town); level.setBlockAndUpdate(start,WWMC.BANNER.get().defaultBlockState());
         for(var station:stations) level.setBlockAndUpdate(station.position(),WWMC.STATIONS.get(station.role()).get().defaultBlockState());
         return town;
+    }
+    /** Older paid projects keep their original supplies and route behavior. */
+    private static void legacyProject(Settlement town,Container stock) {
+        for(int slot=0;slot<4;slot++) stock.removeItem(slot,slot==0 ? 24 : 8);
+        town.progress.project="bronze_age"; town.progress.projectTicks=0;
     }
     private static Container stock(ServerLevel level,Station warehouse) {
         BlockPos chest=warehouse.position().south(2); level.setBlockAndUpdate(chest,Blocks.CHEST.defaultBlockState());

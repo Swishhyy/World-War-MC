@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "wwmc:bronze_boots"
+    "wwmc:bronze_boots",
+    "wwmc:steel_boots"
   ]
 }

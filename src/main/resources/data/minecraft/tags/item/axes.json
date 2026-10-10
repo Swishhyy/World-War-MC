@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "wwmc:bronze_axe"
+    "wwmc:bronze_axe",
+    "wwmc:steel_axe"
   ]
 }

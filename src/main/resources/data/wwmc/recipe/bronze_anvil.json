@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    " I ",
+    "III"
+  ],
+  "key": {
+    "B": "wwmc:bronze_ingot",
+    "I": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "wwmc:bronze_anvil"
+  }
+}

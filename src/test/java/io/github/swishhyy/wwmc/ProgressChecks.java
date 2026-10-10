@@ -18,8 +18,8 @@ public final class ProgressChecks {
         check(CitizenSkill.title(0).equals("Novice") && CitizenSkill.title(4).equals("Master"),"Levels have titles");
         check(CitizenSkill.speed(StructureRole.FARM,4)==12 && CitizenSkill.speed(StructureRole.COOK,4)==16 && CitizenSkill.speed(StructureRole.GUARD,4)==0,
                 "Work speed rises modestly; cooks and smelters a little more; guards fight better instead");
-        check(CitizenSkill.toolSaving(StructureRole.MINE,4)==20 && CitizenSkill.toolSaving(StructureRole.LUMBER,2)==10 && CitizenSkill.toolSaving(StructureRole.FARM,4)==0,
-                "Miners and lumberjacks spare their tools; farmers have no tool to spare");
+        check(CitizenSkill.toolSaving(StructureRole.MINE,4)==20 && CitizenSkill.toolSaving(StructureRole.LUMBER,2)==10 && CitizenSkill.toolSaving(StructureRole.FARM,4)==20,
+                "Experienced miners, lumberjacks and farmers reduce wear on the tools they use");
         check(CitizenSkill.guardDamage(4)==20 && CitizenSkill.guardProtection(4)==12,"A master guard hits a fifth harder and takes 12% less damage");
         check(CitizenSkill.guardCooldown(4,39)==10 && CitizenSkill.guardCooldown(4,40)==20 && CitizenSkill.guardCooldown(0,0)==20,
                 "A master guard recovers early from four swings in ten; a novice never does");

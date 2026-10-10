@@ -25,7 +25,7 @@ public final class WorkProtection {
     private final Map<ServerLevel,List<Move>> moving=new WeakHashMap<>();
     private void placed(ServerLevel level,BlockPos pos,Block block) {
         // Saplings and crops are intentionally eligible for later forestry/farming.
-        if(block instanceof SaplingBlock || block instanceof CropBlock) return;
+        if(block instanceof SaplingBlock || block instanceof CropBlock || block==Blocks.SUGAR_CANE || block==Blocks.BAMBOO) return;
         WorldWorkData data=WorldWorkData.get(level);
         boolean alreadyProtected=data.protectedBlocks.contains(pos);
         data.protect(pos); // Visible to workers immediately, even earlier in this server tick.

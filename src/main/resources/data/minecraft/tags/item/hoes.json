@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "wwmc:bronze_hoe"
+    "wwmc:bronze_hoe",
+    "wwmc:steel_hoe"
   ]
 }

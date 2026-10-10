@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CCC",
+    "IFI",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:cobblestone",
+    "I": "minecraft:copper_ingot",
+    "F": "minecraft:furnace"
+  },
+  "result": {
+    "id": "wwmc:alloy_furnace"
+  }
+}

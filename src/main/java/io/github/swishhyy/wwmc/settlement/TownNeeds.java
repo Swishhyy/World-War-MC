@@ -113,9 +113,13 @@ public final class TownNeeds {
                         needs.add(new Need(WARNING,icon(Items.COAL),name+" needs fuel","A loaded "+(role==StructureRole.COOK ? "oven" : "furnace")
                                 +" has no fuel: stock coal or charcoal in the warehouse for couriers to deliver",pos));
                 }
-                case BLACKSMITH -> { if(SettlementService.anvils(level,town,station).isEmpty()) needs.add(new Need(WARNING,icon(Items.ANVIL),name+" needs an anvil","Place an anvil within three blocks of the station",pos)); }
+                case BLACKSMITH -> {
+                    if(SettlementService.anvils(level,town,station).isEmpty()) needs.add(new Need(WARNING,icon(Items.ANVIL),name+" needs an anvil","Place a bronze or iron anvil within three blocks of the station",pos));
+                    if(town.progress.forgeOrders.stream().anyMatch(o -> o.target()>0) && ForgeWorkshop.heat(level,town,station).isEmpty())
+                        needs.add(new Need(WARNING,icon(Items.FURNACE),name+" needs forge heat","Place a furnace or blast furnace in range for metallurgy and equipment orders",pos));
+                }
                 case ENCHANTER -> { if(SettlementService.enchantingTables(level,town,station).isEmpty()) needs.add(new Need(WARNING,icon(Items.ENCHANTING_TABLE),name+" needs an enchanting table","Place one within "+station.radius()+" blocks of the station",pos)); }
-                case RESEARCHER -> { if(Research.desks(level,town,station).isEmpty()) needs.add(new Need(WARNING,icon(Items.LECTERN),name+" needs a lectern","Place a lectern within "+station.radius()+" blocks; choose a project in Campaign / Research",pos)); }
+                case RESEARCHER -> { if(Research.desks(level,town,station).isEmpty()) needs.add(new Need(WARNING,icon(Items.LECTERN),name+" needs a lectern","Place a lectern within "+station.radius()+" blocks; supply paper and ink or charcoal to make scrolls",pos)); }
                 case HOSPITAL -> { if(SettlementService.beds(level,town,station).isEmpty()) needs.add(new Need(WARNING,station(StructureRole.HOSPITAL),name+" has no patient beds","Place complete beds near the Hospital Station",pos)); }
                 case GUARD -> { if(!GuardService.posts(level,station).chosen()) needs.add(new Need(ADVICE,icon(Items.IRON_SWORD),name+" has no chosen posts","Its guard stands at the station; open it and choose day and night posts",pos)); }
                 case TRADER -> {

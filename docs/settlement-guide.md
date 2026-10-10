@@ -118,11 +118,12 @@ Only loaded blocks inside the settlement claim count. Scanning never loads chunk
 | Craftsman | Learned crafting-table recipes kept at chosen stock levels from real materials. | Stonecutter and smithing orders. |
 | Smeltery | Warehouse ores/raw metals smelted in nearby furnaces or blast furnaces. | Specialized metallurgy and technology. |
 | Cook | Raw food cooked in furnaces, smokers or lit campfires; three wheat become bread. | More meals and food orders. |
-| Blacksmith | Repairs courier-delivered equipment at nearby anvils, leaving it in the job barrel. | Repair orders and specialized smithing. |
+| Blacksmith | Repairs first, then alloys metals and forges ordered equipment at an anvil and furnace. | More metallurgy recipes. |
 | Guard | Day/night posts, shared gear, bell alarms, player-led squads and convoy escorts. | Larger armies and siege tactics. |
 | Courier | The only town hauler: moves job outputs, tools and inputs through the warehouse. | Convoys between towns. |
 | Enchanter | Enchants unenchanted gear and books with lapis at an enchanting table within 5 blocks, up to level 25. | Enchanting orders and libraries. |
-| Researcher | Works at a lectern on the town's paid research project; progress survives pauses and saves. | More technologies and later machine production. |
+| Researcher | Writes real scrolls at a lectern using paper and ink/charcoal; paid work survives saves. | More technologies and later machines. |
+| Gatherer | Harvests cane/bamboo tops and dry exposed sand, gravel and clay with a shovel. | More regional gathering. |
 
 Each station has its own small model built from vanilla textures, a workbench, a watchtower or a tent for example, turned to face the player who placed it. A mine's tunnel entrance and a quarry's red flag point the way they dig. Stations declare use; this build does not infer enclosed rooms, roofs, or architectural quality. Work validates supplies, protection, reservations, loaded terrain, and access before changing blocks.
 
@@ -153,7 +154,7 @@ All markers use eight planks around a center item in a crafting table.
 | Animal Keeper Station | Hay bale |
 | Butcher Station | Wooden axe |
 | Guard Station | Wooden sword |
-| Blacksmith Station | Iron ingot |
+| Blacksmith Station | Copper ingot; Bronze Age required |
 | Courier Station | Barrel |
 | Enchanter Station | Book |
 | Researcher Station | Lectern |
@@ -162,31 +163,24 @@ The Station Inspector is a shapeless recipe with two paper and one stick. The **
 
 ### Ages and research
 
-New settlements in **Villager Colonies 0.1.0.0** start in the **Stone Age**. The settlement's owner and accepted builders or stewards share its equipment unlocks wherever they travel, including other dimensions. Invitations and alliances alone do not share research. Existing settlements retain their previous equipment access when upgraded.
+New settlements begin in the Stone Age. The owner and accepted members share age unlocks everywhere; allies and invitations alone do not grant them. Existing settlements keep their previous equipment access.
 
-1. Craft a **Researcher Station** with eight planks around a lectern. Place it inside your town and put a separate **lectern within three blocks on each axis**.
-2. Keep a citizen assigned to Researcher under **Jobs**, and supply ready-to-eat food.
-3. Open the banner's **Campaign → Research** tab. Place the listed supplies in loaded warehouse storage, then start one project.
-4. Supplies are paid once at the start. The researcher must reach the lectern and work. Sleep, danger, blocked access and unloaded chunks pause progress; the paid project resumes after saving and loading. The banner shows the current age, progress and a **Research status** row with the pause reason. The same status appears in **Campaign → Research**. Time remaining counts active work.
+Researchers now make **Research Scrolls** at real lecterns. Each takes **2 paper, 1 ink sac or charcoal, and 30 seconds of active work**. Set their warehouse target in the banner's **Research** page. Scrolls are real items and can be traded. Spend them alongside the listed materials to unlock discoveries; there is no second project timer. Sleep, danger, blocked routes, missing supplies and full storage all show clear pause reasons.
 
-If the status says **“Researcher cannot reach the lectern”**, clear a walking route and room to stand beside it. Researchers try another approach when a route fails and recheck blocked lecterns after a short pause. Other reasons identify disabled jobs, missing stations or lecterns, unassigned or unloaded workers, meals, sleep, danger and hospital recovery. Normal travel says **“Researcher is walking to the lectern.”** Fixing a pause resumes the paid project; supplies are not charged again, and status changes do not fill chat.
-
-| Research | Warehouse supplies | Active work for one researcher | Equipment unlocked |
+| Discovery | Warehouse supplies | Practical requirement | Unlocks |
 | --- | --- | --- | --- |
-| Bronze Age | 24 copper ingots, 8 tin ingots, 8 coal, 8 paper | 3 minutes | Copper and bronze gear, bronze alloying, Quarry Stations |
-| Iron Age; requires Bronze Age | 16 bronze ingots, 16 iron ingots, 16 coal, 16 paper | 6 minutes | Iron and gold gear, buckets, shields, anvils, smithing and blacksmith stations |
-| Gemcraft; requires Iron Age | 8 diamonds, 24 lapis lazuli, 24 paper | 8 minutes | Diamond gear, enchanting tables and Enchanter Stations |
-| Netherite Smithing; requires Gemcraft | 4 netherite scraps, 16 gold ingots, 32 paper | 10 minutes | Netherite gear and upgrades |
+| Bronze Age | 24 copper, 8 tin, 8 coal, 6 scrolls | Staffed researcher and at least 3 citizens | Copper/bronze forging, bronze anvil, blacksmith and quarry |
+| Iron Age | 16 bronze, 16 iron, 16 coal, 12 scrolls | Bronze Age; staffed smith with anvil and furnace | Iron/gold forging, utility equipment and iron anvils |
+| Gemcraft | 8 diamonds, 24 lapis, 16 scrolls | Iron Age | Diamond gear and enchanting |
+| Netherite Smithing | 4 netherite scraps, 16 gold, 20 scrolls | Gemcraft | Netherite upgrading |
 
-**Tin and bronze.** Tin ore generates in new Overworld terrain from **Y −32 to 64**, including deepslate. Mine it with a stone pickaxe and smelt raw tin into ingots. After Bronze Age research, put **one copper ingot in each of three crafting slots and one tin ingot in a fourth slot** to make **four bronze blends**. This shapeless recipe fits your inventory's 2×2 grid or a crafting table. Smelt each blend with fuel in a furnace or blast furnace to get one bronze ingot; four blends make four ingots.
+**Already-paid research is preserved.** An unfinished project from an older build still completes at its lectern using its saved progress, without charging scrolls or materials again. Completed unlocks remain available.
 
-Collecting copper or tin discovers the blend in the vanilla recipe book. Collecting raw tin, blends and ingots discovers their smelting, equipment and storage recipes. Recipe discovery does not bypass settlement research. The Settlement Guide's **Ages & research** page shows the alloying grid and furnace step.
+After Bronze Age, use an **Alloy Furnace** in your settlement: **3 copper + 1 tin + separate fuel → 4 bronze ingots** in 20 seconds. Both material slots accept ingots, raw metals or ores. A smelter and courier can automate it from its job barrel. Old blends remain smeltable for save compatibility.
 
-Bronze has its own sword, pickaxe, axe, shovel, hoe and complete armor set. Its tools last longer than stone and still need Iron Age equipment for high-tier ores. Ingots and raw tin also have nine-item storage blocks.
+**Equipment must be forged.** Wood and stone gear stay player-crafted. Copper, bronze, iron, gold, diamond and netherite gear must come from a blacksmith. Set orders in **Production → Metalwork**; recipe clicks and vanilla redstone crafters retain their ingredients when a forge-only output is blocked. Existing metal orders learned by craftsmen move to the blacksmith automatically. Native netherite upgrades consume a template, the original diamond item and a netherite ingot, retaining the original item's components.
 
-**Found gear stays yours.** A higher-tier sword, tool or armor piece can be picked up and stored before its research. Mining, fighting, using and wearing it wait for the unlock; armor returns intact to inventory. Locked crafting, anvil and smithing outputs retain their ingredients. A short hotbar notice explains the required research. Creative and spectator players are exempt. The material ingots themselves can be collected and smelted for research beforehand.
-
-Other technologies now use the same researcher system; most take three minutes of active work. Advanced machines remain planned for a later update.
+**Found gear stays yours.** Equipment may be stored before its age is researched; wearing and using it wait for the unlock. Once unlocked, found equipment works normally. Creative and spectator players retain their bypass. See [settlement production](settlement-production.md) for the early-game chain and anvil recipe.
 
 ### Trading and other settlements
 
@@ -208,7 +202,7 @@ Each active trader maintains a moving **3×3 chunk window**. The route does not 
 
 Small NPC towns appear as you explore suitable **loaded Overworld terrain**. Deterministic regions usually put candidate towns about **1,000–2,000 blocks apart**, with larger gaps where terrain or claims prevent building. Sites must be dry, gently sloped, clear of block entities and recorded player blocks, and outside every existing town claim. Construction is saved and proceeds in batches of 128 block placements per tick. Revisiting a region cannot duplicate its town; destroying it does not cause a respawn.
 
-NPC towns start neutral with a house, 12 beds, warehouse, trader checkpoint, guard, farm, lumber operation, renewable iron vein, smelter, kitchen, and courier. They begin with six named citizens (subject to the population cap) and starter supplies, then can recruit up to ten using real surplus food and available housing while ticking. Small crews take one worker per station. Farmers export carrots, timber towns oak logs, and mining towns iron ingots; their own reserves are protected. A free neutral town accepts a proposed route automatically. Deliveries build goodwill; attacking its citizens ends your route, makes it refuse further trade, and its guards defend the town. Countries, sieges, conquest, negotiated prices, route networks, carts and escorts remain future work.
+NPC towns start neutral with a house, 12 beds, warehouse, trader checkpoint, guard, farm, lumber operation, renewable iron vein, smelter, kitchen, and courier. They begin with six named citizens (subject to the population cap) and starter supplies, then can have children under the same happiness, spare-food, housing and population rules as player towns while ticking. Small crews take one worker per station. Farmers export carrots, timber towns oak logs, and mining towns iron ingots; their own reserves are protected. A free neutral town accepts a proposed route automatically. Deliveries build goodwill; attacking its citizens ends your route, makes it refuse further trade, and its guards defend the town. Countries, sieges, conquest, negotiated prices, route networks, carts and escorts remain future work.
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
@@ -316,7 +310,7 @@ Citizens are drawn with the villager head, robe, and skin on a humanoid body wit
 
 Equipment with **less than 25% durability remaining** retires from use. Guards return armor to shared stands, or their local barrel when no rack accepts it; couriers collect retired rack gear. Workers leave worn tools in job barrels.
 
-Craft a Blacksmith Station from an **iron ingot surrounded by eight planks**, and place an anvil and a barrel in its range. Couriers deliver damaged tools, weapons and protective armor plus their matching repair material. The smith repairs the original item, preserving names and enchantments, and returns it to the local barrel for courier pickup. Worn armor on stands in the smith's own range can also be serviced.
+After Bronze Age, craft a Blacksmith Station from a **copper ingot surrounded by eight planks**. Add a bronze or iron anvil and a barrel in range. Forging also requires a furnace and coal/charcoal. Metallurgy belongs to smelters using the new Alloy Furnace. Set orders in **Production → Metalwork**. A bronze anvil works **65% slower than iron** for repairs and forging; both use normal anvil wear. Its station screen shows its condition and speed, and moving it preserves wear. Couriers deliver damaged tools, weapons and protective armor plus their matching repair material. The smith repairs the original item, preserving names and enchantments, and returns it to the local barrel for courier pickup. Worn armor on stands in the smith's own range can also be serviced.
 
 Each material repairs up to 25% of maximum durability: iron gear uses iron ingots, gold gold ingots, diamond diamonds, netherite netherite ingots, leather armor leather, stone tools cobblestone and wooden tools planks. Missing supplies or full storage pauses the job; equipment is never copied or discarded.
 
@@ -344,7 +338,7 @@ New towns, and towns from earlier builds, start with these orders: stone pickaxe
 
 Right-click with an empty hand to open:
 
-- **Settlement banner:** the needs summary and **Needs** tab, the town overview (population, limit and beds, population upgrades, food, warehouse fill, job barrels, claim, job priorities, alarm and waves), every job with its priority and who holds its places, every loaded citizen with their job, activity and health, and every station with its crew and status. Buttons apply a priority preset, sound the alarm or the all-clear, recruit a citizen when housing beds are free, and grow the population limit; the Jobs tab's - and + buttons change one job's priority.
+- **Settlement banner:** a short overview with population, jobs, food, research status and the most urgent need. **People** manages jobs, citizens and housing; **Production** manages stock, workshop and forge orders; **Research** manages scrolls and discoveries; **Neighbours** shows trade and town news. **Needs** lists problems. **More** keeps the alarm, projects, expeditions, settings and map accessible.
 - **Any station:** its detected resources and job status, the citizens assigned to it and what each is doing, the contents of its barrels (or the warehouse's containers), and its upgrades. Work stations have a button for their job's priority, the Cook Station a bread switch, the Guard Station a button to choose its posts, and stations that can be upgraded buttons for range upgrades or quarry crew upgrades. Hover a button to see exactly what it does and costs.
 - **Craftsman Station:** the order screen described above.
 - **Citizen:** their job, activity, health, next meal and equipment above their bag.
@@ -357,7 +351,7 @@ Every citizen has its **own station**. It goes back there each morning, after de
 
 Each job has a **priority**: Off, Low, Normal or High. Set it with the - and + buttons in the banner's **Jobs** tab, the priority button on a station's screen, or `/wwmc job`.
 
-The town header shows **filled / enabled job places**. A station count includes Housing, Barracks and Warehouse Stations, which employ nobody. Most work stations add one place; a quarry adds its configured crew, and a hospital adds a medic only after funding the Field Hospital project. The Jobs tab lists open loaded places, switched-off places and places waiting for loading or a trade route. If all enabled places are full, add work stations or expand a quarry crew; raising a priority moves workers between jobs without creating more places.
+The overview's Jobs row shows **filled / enabled job places**. A station count includes Housing, Barracks and Warehouse Stations, which employ nobody. Most work stations add one place; a quarry adds its configured crew, and a hospital adds a medic only after funding the Field Hospital project. The Jobs tab lists open loaded places, switched-off places and places waiting for loading or a trade route. If all enabled places are full, add work stations or expand a quarry crew; raising a priority moves workers between jobs without creating more places.
 
 - A citizen without a job, such as a new recruit, takes the open place of highest priority. Among equal priorities, guard posts fill first, then the trader, then the station with the fewest workers, then the nearest.
 - About every half minute, and at once after you change a priority, a citizen moves to an open place in a job of **higher** priority than its own. Equal priorities never trade workers, so a new Normal station waits for a recruit, a free citizen or a raised priority.
@@ -423,7 +417,7 @@ Each range or crew level costs twice the one before: 8, 16, then 32 emeralds by 
 
 A new town holds up to **10 citizens** (`basePopulation`). The town screen's **Grow** button raises the limit by **5** (`populationPerUpgrade`) for emeralds: 8 for the first upgrade, then 16, 24 and so on (`populationUpgradeCost`), up to the server's ceiling (`maxCitizens`, 64). Housing beds still limit recruiting as before.
 
-**Population research** in the banner's **Campaign → Research** tab gives another way to grow. **Housing Plans** adds 10 places, **Civic Planning** adds 15, and **City Planning** adds 25. Study them in that order using warehouse materials. Their bonuses stack with emerald upgrades, survive saving, and still obey `maxCitizens`; each recruit needs an available housing bed. The overview shows the research bonus and the correct next upgrade limit.
+**Population research** in the banner's **Research** tab gives another way to grow. **Housing Plans** adds 10 places, **Civic Planning** adds 15, and **City Planning** adds 25. Study them in that order using warehouse materials. Their bonuses stack with emerald upgrades, survive saving, and still obey `maxCitizens`; each recruit needs an available housing bed. The overview shows the research bonus and the correct next upgrade limit.
 
 A bigger town draws bigger attacks. Each population upgrade adds **2 attackers** to every wave (`waveMobsPerUpgrade`), even beyond `waveMaxMobs`; from the first upgrade a tenth of each wave per upgrade are **pillagers**, and from the third upgrade **vindicators** join them. Towns from earlier builds count as having bought enough upgrades for the citizens they already have.
 
@@ -475,3 +469,7 @@ A bigger town draws bigger attacks. Each population upgrade adds **2 attackers**
 - Save/reload support for settlement data, player block protection, replanting sites, excavation progress, cargo, tools, and meal timers.
 
 Further plans include automatic housing construction, wars between rival settlements, distant simulation, larger technology trees, and countries. Barracks identify troop housing and support military projects. Fund a Field Hospital for a medic who treats wounded citizens with meals and paper dressings. Injured citizens rest in hospital beds until full health; ordinary meals satisfy hunger.
+
+## Happiness, children and steel
+
+See [Settlement production](settlement-production.md) for the alloy furnace, Steelworking, happiness, loaded-time births and the growth toggle. [Education design](education-design.md) describes the proposed schooling and apprenticeship system; education restrictions are not enabled.

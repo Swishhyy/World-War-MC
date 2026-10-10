@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "wwmc:wooden_spikes",
-    "wwmc:tangle_net"
+    "wwmc:tangle_net",
+    "wwmc:gatherer_station"
   ]
 }

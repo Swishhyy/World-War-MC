@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/damaged_anvil",
+  "textures": {
+    "body": "wwmc:block/bronze_block",
+    "particle": "wwmc:block/bronze_block",
+    "top": "wwmc:block/bronze_block"
+  }
+}

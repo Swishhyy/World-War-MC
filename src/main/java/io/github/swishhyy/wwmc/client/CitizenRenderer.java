@@ -59,6 +59,9 @@ public final class CitizenRenderer extends HumanoidMobRenderer<CitizenEntity,Cit
         return LayerDefinition.create(mesh,64,64);
     }
     @Override public State createRenderState() { return new State(); }
+    @Override protected void scale(State state,com.mojang.blaze3d.vertex.PoseStack poses) {
+        if(state.isBaby) poses.scale(state.ageScale,state.ageScale,state.ageScale);
+    }
     @Override public Identifier getTextureLocation(State state) { return SKIN; }
     @Override public void extractRenderState(CitizenEntity citizen,State state,float partialTick) {
         super.extractRenderState(citizen,state,partialTick);

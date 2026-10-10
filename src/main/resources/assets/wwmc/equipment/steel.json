@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "wwmc:steel"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "wwmc:steel"
+      }
+    ]
+  }
+}

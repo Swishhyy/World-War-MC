@@ -48,7 +48,7 @@ public final class ExpeditionData extends SavedData {
             this.cleared=cleared; this.claimed=claimed.orElse(null); this.nextRaid=nextRaid; this.ambush=ambush.orElse(null); this.victim=victim.orElse(null);
             this.objective=objective; this.resource=resource; this.captives=new ArrayList<>(captives); this.leader=leader.orElse(null); this.rewarded=rewarded;
         }
-        public String title() { return switch(kind) { case "mine" -> "Ruined Mining Workshop"; case "fort" -> "Ruined Castle"; case "raid" -> "Bandit Raid"; default -> "Bandit Camp"; }; }
+        public String title() { return switch(kind) { case "townhall" -> "Ruined Town Hall"; case "mine" -> "Ruined Mining Workshop"; case "fort" -> "Ruined Castle"; case "raid" -> "Bandit Raid"; default -> "Bandit Camp"; }; }
         /** The objective in force: forts found before objectives still hold a captain and a schematic. */
         public String task() { return objective.isEmpty() && kind.equals("fort") ? LEADER : objective; }
         /** What the expedition must do here, for the Sites list. */

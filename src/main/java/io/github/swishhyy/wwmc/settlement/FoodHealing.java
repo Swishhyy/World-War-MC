@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.Tags;
 
-/** An actual meal supplies nutrition-sized healing, and keeps its bowl or bottle. */
+/** Safe meal selection keeps its bowl or bottle; citizens use meals for hunger, not healing. */
 public final class FoodHealing {
     public static final int COOLDOWN=600;
     private FoodHealing() {}
@@ -26,7 +26,11 @@ public final class FoodHealing {
         return rationTicks<=0 || cooldown<=0 && health<maximum;
     }
     public static ItemStack take(List<Container> storage,Consumer<ItemStack> remainder) {
-        ItemStack meal=InventoryOps.takeOne(storage,FoodHealing::food);
+        return take(storage,remainder,List.of());
+    }
+    /** Prefer an uneaten or less recently eaten meal, rather than always emptying the first food slot. */
+    public static ItemStack take(List<Container> storage,Consumer<ItemStack> remainder,List<String> recent) {
+        ItemStack meal=InventoryOps.takeBest(storage,FoodHealing::food,s -> -(recent.lastIndexOf(MealVariety.id(s))+1));
         var container=meal.get(DataComponents.USE_REMAINDER);
         if(container!=null) remainder.accept(container.convertInto().create());
         return meal;
