@@ -52,7 +52,8 @@ public final class WellbeingAlloyWorldTests {
         }
     }
     private static Fixture fixture(ServerLevel level,BlockPos start,Station... stations) {
-        var chunks=CitizenNavigationTests.pinTicking(level,start,2); CitizenNavigationTests.meadow(level,start,-8,42,-14,14);
+        // The smith at x+39 must tick even when the origin is at the far edge of its chunk.
+        var chunks=CitizenNavigationTests.pinTicking(level,start,3); CitizenNavigationTests.meadow(level,start,-8,42,-14,14);
         var town=new Settlement(UUID.randomUUID(),UUID.randomUUID(),"Wellbeing and alloys",start,96,List.of(),List.of(stations),"balanced");
         SettlementData.get(level).settlements.add(town); level.setBlockAndUpdate(start,WWMC.BANNER.get().defaultBlockState());
         for(Station s:stations) level.setBlockAndUpdate(s.position(),WWMC.STATIONS.get(s.role()).get().defaultBlockState());
@@ -190,11 +191,18 @@ public final class WellbeingAlloyWorldTests {
             resumed.setItem(3,ItemStack.EMPTY); step(level,pos,resumed,600);
             helper.assertTrue(resumed.getItem(3).is(WWMC.STEEL_INGOT.get()) && resumed.getItem(3).getCount()==1 && resumed.getItem(0).isEmpty() && resumed.getItem(1).isEmpty() && resumed.getItem(2).isEmpty(),"Steel did not consume iron, carbon and separate fuel exactly once");
             helper.assertTrue(AgeProgression.allowed(f.town,new ItemStack(WWMC.STEEL_PICKAXE.get())) && ForgeWorkshop.plans(level,new Workshop.Order("wwmc:steel_pickaxe",1)).size()==1,"Steelworking did not unlock real forged steel equipment");
-            resumed.setItem(0,new ItemStack(Items.IRON_INGOT,2)); level.destroyBlock(pos,true);
+            resumed.setItem(0,new ItemStack(Items.IRON_INGOT,2));
+            helper.runAtTickTime(5,() -> {
+                helper.assertTrue(level.getBlockEntity(pos)==resumed,"Restored furnace was not installed in the native chunk");
+                level.destroyBlock(pos,true);
+            });
+            // Item entity registration, like citizen registration, completes after the current world tick.
+            helper.runAtTickTime(10,() -> {
             int iron=level.getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(2)).stream().filter(e -> e.getItem().is(Items.IRON_INGOT)).mapToInt(e -> e.getItem().getCount()).sum();
             int steel=level.getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(2)).stream().filter(e -> e.getItem().is(WWMC.STEEL_INGOT.get())).mapToInt(e -> e.getItem().getCount()).sum();
-            helper.assertTrue(iron==2 && steel==1,"Breaking the alloy furnace lost or duplicated contents");
+            helper.assertTrue(iron==2 && steel==1,"Breaking the alloy furnace lost or duplicated contents: iron="+iron+", steel="+steel);
             f.close(); helper.succeed();
+            });
         });
     }
 
