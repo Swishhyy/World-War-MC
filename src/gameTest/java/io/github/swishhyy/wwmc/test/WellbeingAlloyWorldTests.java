@@ -199,7 +199,7 @@ public final class WellbeingAlloyWorldTests {
     }
 
     @GameTest(timeoutTicks=2200) @EmptyTemplate
-    @TestHolder(description="Actual couriers deliver copper, tin and fuel to a smelter, who fills and empties a real alloy furnace; the warehouse receives bronze and surplus ingots remain collectable.")
+    @TestHolder(description="Actual couriers deliver copper, tin and fuel to a smelter and return bronze. In-transit alloys count toward the stock target, no extra batch starts, and the target remains stable beyond another full furnace cycle.")
     static void courierAndSmelterAutomateBronze(DynamicTest test) {
         test.onGameTest(helper -> {
             var level=helper.getLevel(); BlockPos start=helper.absolutePos(new BlockPos(0,2,-24600));
@@ -208,11 +208,15 @@ public final class WellbeingAlloyWorldTests {
             Container stock=barrel(level,warehouse.position().south(2),new ItemStack(Items.COPPER_INGOT,24),new ItemStack(WWMC.TIN_INGOT.get(),8),new ItemStack(Items.COAL,8));
             Container local=barrel(level,smelter.position().south(2)); BlockPos appliance=smelter.position().north(2);
             level.setBlockAndUpdate(appliance,WWMC.ALLOY_FURNACE.get().defaultBlockState());
+            var furnace=(AlloyFurnaceEntity)level.getBlockEntity(appliance); long[] deliveredAt={-1};
             var worker=f.citizen(smelter.position().south(),smelter,true); var carrier=f.citizen(courier.position().south(),courier,true);
             helper.succeedWhen(() -> {
-                helper.assertTrue(InventoryOps.count(List.of(stock),s -> s.is(WWMC.BRONZE_INGOT.get()))>=4,"No real warehouse alloy delivery: smelter="+worker.activity()+", courier="+carrier.activity());
-                helper.assertTrue(InventoryOps.count(List.of(stock,local,worker.bag(),carrier.bag()),s -> s.is(Items.COPPER_INGOT))==21
-                        && InventoryOps.count(List.of(stock,local,worker.bag(),carrier.bag()),s -> s.is(WWMC.TIN_INGOT.get()))==7,"Automated alloys synthesized or overconsumed metal");
+                var all=List.of(stock,local,worker.bag(),carrier.bag(),furnace);
+                helper.assertTrue(InventoryOps.count(List.of(stock),s -> s.is(WWMC.BRONZE_INGOT.get()))==4,"No exact warehouse alloy delivery: smelter="+worker.activity()+", courier="+carrier.activity());
+                helper.assertTrue(InventoryOps.count(all,s -> s.is(Items.COPPER_INGOT))==21 && InventoryOps.count(all,s -> s.is(WWMC.TIN_INGOT.get()))==7
+                        && furnace.getItem(0).isEmpty() && furnace.getItem(1).isEmpty(),"Automated alloys synthesized metal or loaded an extra batch while a courier carried the stocked output");
+                if(deliveredAt[0]<0) deliveredAt[0]=level.getGameTime();
+                helper.assertTrue(level.getGameTime()-deliveredAt[0]>=650,"Waiting beyond another full furnace cycle to verify stable alloy stock");
                 local.setItem(20,new ItemStack(Items.COPPER_INGOT,64));
                 helper.assertTrue(JobStorage.collectable(JobStorage.Supplies.of(level),f.town,StructureRole.SMELTERY,List.of(local)).stream()
                         .anyMatch(p -> p.container().getItem(p.slot()).is(Items.COPPER_INGOT)),"Alloy input reserves hoarded every surplus copper ingot");
