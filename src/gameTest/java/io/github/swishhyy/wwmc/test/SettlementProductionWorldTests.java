@@ -44,7 +44,8 @@ public final class SettlementProductionWorldTests {
         }
     }
     private static Fixture fixture(ServerLevel level,BlockPos start,Station... stations) {
-        var chunks=CitizenNavigationTests.pinTicking(level,start,2); CitizenNavigationTests.meadow(level,start,-8,36,-12,12);
+        // Cover x+34 couriers and their whole floor at every chunk alignment.
+        var chunks=CitizenNavigationTests.pinTicking(level,start,3); CitizenNavigationTests.meadow(level,start,-8,36,-12,12);
         var town=new Settlement(UUID.randomUUID(),UUID.randomUUID(),"Settlement production",start,96,List.of(),List.of(stations),"balanced");
         SettlementData.get(level).settlements.add(town); level.setBlockAndUpdate(start,WWMC.BANNER.get().defaultBlockState());
         for(var station:stations) level.setBlockAndUpdate(station.position(),WWMC.STATIONS.get(station.role()).get().defaultBlockState());

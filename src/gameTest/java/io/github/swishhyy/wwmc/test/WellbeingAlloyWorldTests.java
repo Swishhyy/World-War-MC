@@ -52,7 +52,8 @@ public final class WellbeingAlloyWorldTests {
         }
     }
     private static Fixture fixture(ServerLevel level,BlockPos start,Station... stations) {
-        var chunks=CitizenNavigationTests.pinTicking(level,start,2); CitizenNavigationTests.meadow(level,start,-8,42,-14,14);
+        // The smith at x+39 must tick even when the origin is at the far edge of its chunk.
+        var chunks=CitizenNavigationTests.pinTicking(level,start,3); CitizenNavigationTests.meadow(level,start,-8,42,-14,14);
         var town=new Settlement(UUID.randomUUID(),UUID.randomUUID(),"Wellbeing and alloys",start,96,List.of(),List.of(stations),"balanced");
         SettlementData.get(level).settlements.add(town); level.setBlockAndUpdate(start,WWMC.BANNER.get().defaultBlockState());
         for(Station s:stations) level.setBlockAndUpdate(s.position(),WWMC.STATIONS.get(s.role()).get().defaultBlockState());
@@ -190,16 +191,23 @@ public final class WellbeingAlloyWorldTests {
             resumed.setItem(3,ItemStack.EMPTY); step(level,pos,resumed,600);
             helper.assertTrue(resumed.getItem(3).is(WWMC.STEEL_INGOT.get()) && resumed.getItem(3).getCount()==1 && resumed.getItem(0).isEmpty() && resumed.getItem(1).isEmpty() && resumed.getItem(2).isEmpty(),"Steel did not consume iron, carbon and separate fuel exactly once");
             helper.assertTrue(AgeProgression.allowed(f.town,new ItemStack(WWMC.STEEL_PICKAXE.get())) && ForgeWorkshop.plans(level,new Workshop.Order("wwmc:steel_pickaxe",1)).size()==1,"Steelworking did not unlock real forged steel equipment");
-            resumed.setItem(0,new ItemStack(Items.IRON_INGOT,2)); level.destroyBlock(pos,true);
+            resumed.setItem(0,new ItemStack(Items.IRON_INGOT,2));
+            helper.runAtTickTime(5,() -> {
+                helper.assertTrue(level.getBlockEntity(pos)==resumed,"Restored furnace was not installed in the native chunk");
+                level.destroyBlock(pos,true);
+            });
+            // Item entity registration, like citizen registration, completes after the current world tick.
+            helper.runAtTickTime(10,() -> {
             int iron=level.getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(2)).stream().filter(e -> e.getItem().is(Items.IRON_INGOT)).mapToInt(e -> e.getItem().getCount()).sum();
             int steel=level.getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(2)).stream().filter(e -> e.getItem().is(WWMC.STEEL_INGOT.get())).mapToInt(e -> e.getItem().getCount()).sum();
-            helper.assertTrue(iron==2 && steel==1,"Breaking the alloy furnace lost or duplicated contents");
+            helper.assertTrue(iron==2 && steel==1,"Breaking the alloy furnace lost or duplicated contents: iron="+iron+", steel="+steel);
             f.close(); helper.succeed();
+            });
         });
     }
 
     @GameTest(timeoutTicks=2200) @EmptyTemplate
-    @TestHolder(description="Actual couriers deliver copper, tin and fuel to a smelter, who fills and empties a real alloy furnace; the warehouse receives bronze and surplus ingots remain collectable.")
+    @TestHolder(description="Actual couriers deliver copper, tin and fuel to a smelter and return bronze. In-transit alloys count toward the stock target, no extra batch starts, and the target remains stable beyond another full furnace cycle.")
     static void courierAndSmelterAutomateBronze(DynamicTest test) {
         test.onGameTest(helper -> {
             var level=helper.getLevel(); BlockPos start=helper.absolutePos(new BlockPos(0,2,-24600));
@@ -208,11 +216,15 @@ public final class WellbeingAlloyWorldTests {
             Container stock=barrel(level,warehouse.position().south(2),new ItemStack(Items.COPPER_INGOT,24),new ItemStack(WWMC.TIN_INGOT.get(),8),new ItemStack(Items.COAL,8));
             Container local=barrel(level,smelter.position().south(2)); BlockPos appliance=smelter.position().north(2);
             level.setBlockAndUpdate(appliance,WWMC.ALLOY_FURNACE.get().defaultBlockState());
+            var furnace=(AlloyFurnaceEntity)level.getBlockEntity(appliance); long[] deliveredAt={-1};
             var worker=f.citizen(smelter.position().south(),smelter,true); var carrier=f.citizen(courier.position().south(),courier,true);
             helper.succeedWhen(() -> {
-                helper.assertTrue(InventoryOps.count(List.of(stock),s -> s.is(WWMC.BRONZE_INGOT.get()))>=4,"No real warehouse alloy delivery: smelter="+worker.activity()+", courier="+carrier.activity());
-                helper.assertTrue(InventoryOps.count(List.of(stock,local,worker.bag(),carrier.bag()),s -> s.is(Items.COPPER_INGOT))==21
-                        && InventoryOps.count(List.of(stock,local,worker.bag(),carrier.bag()),s -> s.is(WWMC.TIN_INGOT.get()))==7,"Automated alloys synthesized or overconsumed metal");
+                var all=List.of(stock,local,worker.bag(),carrier.bag(),furnace);
+                helper.assertTrue(InventoryOps.count(List.of(stock),s -> s.is(WWMC.BRONZE_INGOT.get()))==4,"No exact warehouse alloy delivery: smelter="+worker.activity()+", courier="+carrier.activity());
+                helper.assertTrue(InventoryOps.count(all,s -> s.is(Items.COPPER_INGOT))==21 && InventoryOps.count(all,s -> s.is(WWMC.TIN_INGOT.get()))==7
+                        && furnace.getItem(0).isEmpty() && furnace.getItem(1).isEmpty(),"Automated alloys synthesized metal or loaded an extra batch while a courier carried the stocked output");
+                if(deliveredAt[0]<0) deliveredAt[0]=level.getGameTime();
+                helper.assertTrue(level.getGameTime()-deliveredAt[0]>=650,"Waiting beyond another full furnace cycle to verify stable alloy stock");
                 local.setItem(20,new ItemStack(Items.COPPER_INGOT,64));
                 helper.assertTrue(JobStorage.collectable(JobStorage.Supplies.of(level),f.town,StructureRole.SMELTERY,List.of(local)).stream()
                         .anyMatch(p -> p.container().getItem(p.slot()).is(Items.COPPER_INGOT)),"Alloy input reserves hoarded every surplus copper ingot");

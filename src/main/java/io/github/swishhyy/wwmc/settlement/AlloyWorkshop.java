@@ -42,6 +42,8 @@ public final class AlloyWorkshop {
     public static Plan choose(ServerLevel level,Settlement town,AlloyFurnaceEntity furnace,List<Container> supplies) {
         Set<Container> unique=Collections.newSetFromMap(new IdentityHashMap<>());
         unique.addAll(SettlementService.townStorage(level,town)); unique.addAll(supplies); unique.add(furnace);
+        // A courier handoff changes the location of stock, not the amount already produced.
+        for(UUID id:town.citizens) if(level.getEntity(id) instanceof io.github.swishhyy.wwmc.entity.CitizenEntity citizen && citizen.isAlive()) unique.add(citizen.bag());
         var stored=new ArrayList<>(unique);
         for(Item item:List.of(WWMC.BRONZE_INGOT.get(),WWMC.STEEL_INGOT.get())) {
             boolean bronze=item==WWMC.BRONZE_INGOT.get();

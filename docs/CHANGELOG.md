@@ -10,6 +10,7 @@
 - Add a smelter-operated Alloy Furnace with two material inputs, separate fuel, saved progress, hopper support and clear pause reasons. Make bronze directly from copper + tin; keep old blends smeltable.
 - Add Steelworking after Iron Age, steel ingots, tools and armor, using native iron model and texture recolors. Smelters alloy iron + coal/charcoal; blacksmiths forge and repair the equipment.
 - Share small fuel deliveries across production stations. Ordinary smelters return finished iron; blacksmiths release surplus ingredients when their finished orders are stocked locally.
+- Count alloys carried by couriers and other citizens toward stock targets so a handoff does not start another unnecessary batch.
 - Simplify the banner to an overview and four main destinations: People, Production, Research and Neighbours.
 - Add stock orders for automatic job block production and blacksmith forging, without requiring example items.
 - Require blacksmith forging for bronze, copper and later equipment. Keep wood and stone player-crafted; protect ingredients when blocked, including vanilla redstone crafters.
